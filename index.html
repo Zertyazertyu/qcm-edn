@@ -1,0 +1,638 @@
+<head>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sides du bled</title>
+    <link rel="shortcut icon"
+        href="https://media.discordapp.net/attachments/757509431498899496/1043156813954170880/unknown.png" />
+
+</head>
+<style>
+    html {
+        weight: 100%;
+    }
+
+    .container {
+        margin-left: auto;
+        margin-right: auto;
+        color: #333;
+        font-family: Roboto, sans-serif;
+        border-radius: 4px;
+        padding: 2%;
+        box-shadow: 0 0 0 1px #c5c5c5;
+        background-color: #f5f5f5;
+        display: block;
+        counter-reset: question-number;
+        max-width: 1000px;
+
+    }
+
+    .totalofqcm>* {
+        display: inline-block;
+    }
+
+    .totalofqcm>input {
+        width: 60px;
+    }
+
+    .question {
+        padding-top: 5px;
+        padding-bottom: 15px;
+        border-bottom: 3px dashed #d0d0d0;
+    }
+
+
+    img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    input {
+        min-width: 20px;
+        min-height: 20px;
+    }
+
+
+
+    .info {
+
+        font-size: 125%;
+        font-weight: bolder;
+        counter-reset: proposition;
+        counter-set: fautes 0;
+
+    }
+
+    .question>.info::after {
+
+        counter-increment: question-number;
+        content: "Question "counter(question-number);
+    }
+
+    .purpose {
+        width: 100%;
+        display: flex;
+        align-items: center;
+    }
+
+    .purpose>span:not(.notiterable)::before {
+        counter-increment: proposition;
+        content: counter(proposition, lower-alpha) ". ";
+
+    }
+
+
+
+    .answerList {
+        padding-bottom: 5px;
+        padding-top: 5px;
+    }
+
+    .answerList>* {
+        margin: 3px;
+        padding: 3px;
+        border-radius: 2px;
+        align-items: stretch;
+        display: flex;
+        background-color: #e0e0e0;
+    }
+
+    .correct {
+        background-color: #b2edaf;
+    }
+
+    .wrong {
+        background-color: #f4b9b8;
+        counter-increment: fautes;
+    }
+
+    .missing {
+        background-color: #edde6f;
+        counter-increment: fautes;
+    }
+
+
+    .feedback {
+        padding: 10px;
+        border-left: 2px solid #747474;
+        font-weight: 400;
+        font-style: italic;
+        background-color: #cacaca;
+        border-radius: 3px;
+        margin-right: 8px;
+    }
+
+
+    .fbtitle {
+        font-weight: 700;
+    }
+
+    .modtitle {
+        font-weight: 700;
+        font-size: 120%;
+        padding: 5px;
+    }
+
+
+    .result {
+        border-bottom: 3px dashed #d0d0d0;
+        padding: 10px;
+        color: #212529;
+        font-weight: 700;
+
+    }
+
+    .field {
+        padding: 15px;
+
+
+    }
+
+    .field>* {
+        font-size: calc(.90375rem + .045vw);
+        border-radius: 2px;
+        height: 32px;
+        margin-right: 5px;
+        width: 60%;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .switcher {
+        margin-top: 10px;
+        margin-left: calc(100% - 105px);
+        border-radius: 4px;
+        font-size: 150%;
+    }
+
+    .seedentry {
+        width: 80%;
+    }
+</style>
+
+<body>
+    <div class="container">
+
+    </div>
+
+    </div>
+</body>
+<script>
+
+
+
+    info = [
+        {"title": "debug0", "number": 3, "module": "test", "path": "https://raw.githubusercontent.com/Zertyazertyu/Sides-du-bled/main/test.json"},
+        {"title": "debug1", "number": 3, "module": "test", "path": undefined},
+        {"title": "debug2", "number": 3, "module": "salut", "path": undefined},
+        {"title": "debug3", "number": 3, "module": "test", "path": undefined}
+    ]
+
+
+
+    qcmType = {
+        'type': 'qcm',
+        'title': "<p>Un patient âgé de 72 ans, doit faire l’objet d’une intervention chirurgicale lourde. Compte tenu de son passé tabagique(60 PA) des EFR sont réalisées dont voici le résultat.</p><p>Parmi les affirmations suivantes lesquelles s’appliquent-elles à l’examen qui a été réalisé ? (une ou plusieurs réponses possibles)</p><p><img src=\"https://media.discordapp.net/attachments/1048380922971566220/1051610242468819085/f0ebb2224d6f03bd5a46b1efebb98ff10b8ef5f5.png\"></p>", 'choices': ["L'examen n'a comporté qu'une spirométrie", "L'examen pratiqué comporte est un test de marche de 6 minutes avec mesure de la SpO2", "L'examen pratiqué comporte est un test de marche de 6 minutes avec mesure de la SpO2", "Un test pharmacologique aux bronchodilatateurs a été pratiqué", "Une étude du transfert du CO au repos a été pratiquée"], 'answers': [false, false, true, true, true], 'feedback': "Les réponses correctes sont: Une étude des volumes non mobilisables (pléthysmgraphie) a été pratiquée, Un test pharmacologique aux bronchodilatateurs a été pratiqué, Une étude du transfert du CO au repos a été pratiquée"
+    }
+
+    qrocType = {
+        'type': 'qroc',
+        'title': '<div class="qtext"><p>Un patient âgé de 69 ans, fumeur (50 PA) consulte pour dyspnée. Des EFR sont réalisées dont voici le résultat.</p><p>Quelle pathologie pulmonaire chronique rend elle vraisemblablement compte des anomalies observées sur les EFR de ce patient ?</p><p><img src="https://media.discordapp.net/attachments/928247821784739850/1052325556177354913/9523d3484c356ca536429e1a1051abd2882fc473.png"></p></div>', 'responses': [["BPCO"]], 'feedback': "La réponse correcte est : BPCO"
+
+    }
+
+    qruType = {
+        'type': 'qru',
+        'title': '<div class="qtext"><p>Vers où votre regard se portera-t-il en priorité&nbsp;?</p><p>Un patient âgé de 62 ans se plaint d’une toux sèche évoluant depuis 3 mois, de crachats hémoptoïques plus récents. A l’écouter vous notez une voix bitonale. Il vous montre un cliché de thorax qu’un de vos confrères avait prescrit.</p><br><p><img src="https://media.discordapp.net/attachments/928247821784739850/1052325339570896907/034aa1c6a2ad27db446bbe7d33e82372863df000.png"></p></div>',
+        'choices': ['en 1', 'en 2', 'en 3', 'en 4', 'en 5'],
+        'answer': 1,
+        'feedback': "La symptomatologie fait évoquer une tumeur proximale avec syndrome récurrentiel. On cherche dont une tumeur du hile gauche avec envahissement de la fenêtre aorto-pulmonaire La réponse correcte est: en 2"
+    }
+
+
+
+    correction = false
+
+
+    function verify() {
+        correction = !correction
+        result = document.querySelector('.result')
+        if (correction) {
+            result.classList.remove('hidden')
+            result.innerText = "Résultat: " + getUserScore()
+        }
+        else {
+            result.classList.add('hidden')
+            for (elem of document.querySelectorAll('.missing')) {elem.classList.remove('missing')}
+            for (elem of document.querySelectorAll('.wrong')) {elem.classList.remove('wrong')}
+            for (elem of document.querySelectorAll('.correct')) {elem.classList.remove('correct')}
+            for (elem of document.querySelectorAll('.feedback')) {elem.classList.add('hidden')}
+        }
+        elemlist = document.querySelectorAll("input")
+        for (elem of elemlist) {elem.disabled = correction}
+
+    }
+
+    function getUserScore() {
+        score = 0
+        elemlist = document.querySelectorAll(".answer")
+        for (let i = 0; i < elemlist.length; i++) {
+            nbfautes = correct(elemlist[i], Qcm_data[i])
+            score = score + betterPoints(nbfautes)
+        }
+        return betterDigit(score) + '/' + elemlist.length
+    }
+
+
+
+    function betterDigit(nb) {
+        nb = nb.toString()
+        if (!nb.includes('.')) {nb = nb + "."}
+        return nb + '0'.repeat(3 - nb.substr(nb.indexOf('.')).length)
+    }
+
+    function betterPoints(nbfautes) {
+        return ((nbfautes == 0) ? 1 : (nbfautes == 1) ? 0.5 : (nbfautes == 2) ? 0.25 : 0)
+    }
+
+
+    function correct(qcm, ref) {
+        nbfautes = 0
+        if (ref['type'] == "qcm") {
+            for (let i = 0; i < qcm.children.length; i++) {
+                if (ref['answers'][i]) {
+                    if (!(qcm.children[i].children[0].checked)) {
+                        qcm.children[i].classList.add('missing')
+                        nbfautes++
+                    } else {qcm.children[i].classList.add('correct')}
+                } else {
+                    if (qcm.children[i].children[0].checked) {
+                        qcm.children[i].classList.add('wrong')
+                        nbfautes++
+                    }
+                }
+            }
+            feed = qcm.parentNode.children[3].children[0]
+            tmp = nbfautes + " discordance" + ((nbfautes != 1) ? 's (' : ' (') + betterPoints(nbfautes) + " point" + ((betterPoints(nbfautes) != 1) ? 's).' : ').')
+            feed.innerText = tmp
+        }
+        else if (ref['type'] == 'qroc') {
+            content = qcm.children[0].value.toLowerCase().replace(/^;+|;+$| /g, '').split(/;+/)
+            tmp = JSON.parse(JSON.stringify(ref['responses']).toLowerCase())
+            for (0; content.length > tmp.length; tmp.push([undefined])) {}
+            shift = 0
+            for (let i = 0; i < tmp.length; i++) {
+                for (const terme of content) {
+                    if (tmp[i].includes(terme)) {
+                        delete tmp[i]
+                        shift++
+                        break
+                    }
+                }
+            }
+            nbfautes = tmp.filter(x => x).length
+            if (ref['responses'].length > nbfautes) {
+                if (!nbfautes) {qcm.children[0].classList.add("correct")}
+                else {qcm.children[0].classList.add("missing")}
+            }
+            else {
+                qcm.children[0].classList.add("wrong")
+                nbfautes = 4
+            }
+            qcm.parentNode.children[3].classList.remove("hidden")
+            feed = qcm.parentNode.children[3].children[0]
+            feed.innerText = betterPoints(nbfautes) + " point" + ((betterPoints(nbfautes) != 1) ? 's.' : '.')
+        }
+        else if (ref['type'] == 'qru') {
+            for (let i = 0; i < qcm.children.length; i++) {
+                if (ref['answer'] == i) {
+                    if (qcm.children[i].children[0].checked) {
+                        qcm.children[i].classList.add('correct')
+                    }
+                    else {
+                        qcm.children[i].classList.add('missing')
+                        nbfautes++
+                    }
+                }
+                else if (qcm.children[i].children[0].checked) {
+                    qcm.children[i].classList.add('wrong')
+                    nbfautes++
+                }
+
+
+            }
+
+            if (nbfautes) {nbfautes = 4}
+            feed = qcm.parentNode.children[3].children[0]
+            feed.innerText = betterPoints(nbfautes) + " point" + ((betterPoints(nbfautes) != 1) ? 's.' : '.')
+        }
+
+        qcm.parentNode.children[3].classList.remove("hidden")
+        return nbfautes
+    }
+
+
+    function createClassElement(type, ...classes) {
+        tmp = document.createElement(type)
+        for (cls of classes) {
+            tmp.classList.add(cls)
+        }
+        return tmp
+
+    }
+    function createQcmElement(qcm) {
+        container = document.querySelector(".container")
+        newQcm = createClassElement('div', 'question', qcm['type'])
+        newQcm.appendChild(createClassElement('div', 'info'))
+        qcmTitle = createClassElement('div', 'qtext')
+        qcmTitle.innerHTML = qcm['title']
+        qcmFb = createClassElement('div', 'feedback', 'hidden')
+        qcmFb.appendChild(createClassElement('div', 'fbtitle'))
+        qcmfbb = document.createElement('div')
+        qcmfbb.innerText = qcm['feedback']
+        qcmFb.appendChild(qcmfbb)
+        newQcm.appendChild(qcmTitle)
+        if (qcm['type'] == 'qcm' || qcm['type'] == 'qru') {
+            qcmChoices = createClassElement('div', 'answerList', 'answer')
+            if (qcm['type'] == 'qru') {radioName = Date.now()}
+            else {radioName = undefined}
+            for (let i = 0; i < qcm['choices'].length; i++) {
+                qcmChoices.appendChild(createChoice(qcm['choices'][i], radioName))
+            } newQcm.appendChild(qcmChoices)
+        }
+        else if (qcm['type'] == 'qroc') {
+            qrocResponse = createClassElement('div', 'field', 'answer')
+            qrocResponse.innerText = "Réponse : "
+            field = document.createElement('input')
+            field.type = 'text'
+            qrocResponse.appendChild(field)
+            newQcm.appendChild(qrocResponse)
+        }
+        newQcm.appendChild(qcmFb)
+        container.appendChild(newQcm)
+    }
+    function createChoice(content, tag = false, no_prefix = false) {
+        qst = document.createElement('div')
+        mark = document.createElement('input')
+
+        if (tag) {
+            mark.type = 'radio'
+            mark.name = tag
+        }
+        else {mark.type = 'checkbox'}
+        choice = createClassElement('div', 'purpose')
+        qst.appendChild(mark)
+        tmp = document.createElement('span')
+        tmp.innerText = content
+        if (no_prefix) {tmp.classList.add('notiterable')}
+        choice.appendChild(tmp)
+        qst.appendChild(choice)
+        choice.addEventListener('click', function (e) {
+            this.parentNode.children[0].click()
+        })
+        return qst
+    }
+
+
+    function createSet(data, serial = false) {
+        Qcm_data = data
+        document.querySelector('.container').appendChild(createClassElement('div', 'result', 'hidden'))
+        for (elem of Qcm_data) {createQcmElement(elem)}
+        button = createClassElement('button', 'switcher')
+        button.innerText = "Corriger"
+        button.onclick = verify
+        document.querySelector(".container").appendChild(button)
+    }
+
+    function createStartInterface() {
+        container = document.querySelector('.container')
+        title = createClassElement('div', 'info')
+        title.innerText = "Sides du bled"
+        container.appendChild(title)
+        modules = getModuleList()
+        for (key of Object.keys(modules)) {
+            moduleContainer = createClassElement('div', "answerList")
+            moduleContainer.moduleName = key
+            moduleTitle = createClassElement('div', "modtitle")
+            moduleContainer.appendChild(moduleTitle)
+            nbContent = 0
+            if (modules[key].length > 1) {
+                tmp = createChoice("Tout sélectionner/retirer", false, true)
+                tmp.children[0].classList.add('selectall')
+                tmp.classList.add('hidden')
+                tmp.children[0].addEventListener('click', function (e) {
+                    for (elt of this.parentNode.parentNode.querySelectorAll("input:not(.selectall)")) {
+                        if (elt.checked != this.checked) {elt.click()}
+                    }
+
+                })
+                moduleContainer.appendChild(tmp)
+            }
+            for (elt in modules[key]) {
+                target = modules[key][elt]
+                tt = createChoice(target['title'] + ' (' + target['number'] + ')', false, true)
+                tt.children[0].number = target['number']
+                tt.children[0].title = target['title']
+                tt.children[0].addEventListener('click', function (e) {
+                    target = this.parentNode.parentNode.querySelector('.modtitle')
+                    total = document.querySelector('.totalofqcm').children[2]
+                    if (this.checked) {
+                        target.count += this.number
+                        total.value += this.number
+                    }
+                    else {
+                        target.count -= this.number
+                        total.value -= this.number
+                    }
+                    target.innerText = target.baseText.replace("<?>", target.count)
+                    total.innerText = total.baseText.replace("<?>", total.value)
+                })
+                tt.classList.add('hidden')
+                moduleContainer.appendChild(tt)
+                nbContent = nbContent + target['number']
+
+            }
+            moduleTitle.count = 0
+            moduleTitle.baseText = key + ': <?>/' + nbContent + " QCM"
+            moduleTitle.innerText = key + ': 0/' + nbContent + " QCM"
+            moduleTitle.addEventListener('click', hideChoices)
+            container.appendChild(moduleContainer)
+        }
+        options = createClassElement('div', "answerList", "options")
+        options.appendChild(createChoice('Mode progressif', false, true))
+        sortOption = createChoice('Ne pas mélanger les QCM', false, true)
+        sortOption.addEventListener('click', function (e) {
+            if (!this.children[0].checked) {
+
+                this.parentNode.querySelector('.totalofqcm').classList.remove('hidden')
+            }
+            else {
+                this.parentNode.querySelector('.totalofqcm').classList.add('hidden')
+            }
+        })
+        options.appendChild(sortOption)
+        numberEntry = createClassElement("div", "totalofqcm")
+        tmp = document.createElement('div')
+        tmp.innerText = "Nombre de QCM:"
+        numberEntry.appendChild(tmp)
+        entryField = document.createElement('input')
+        entryField.type = 'number'
+        entryField.min = 0
+        numberEntry.appendChild(entryField)
+        tmp = document.createElement('div')
+        tmp.baseText = '/<?> QCM'
+        tmp.innerText = '/0 QCM'
+        tmp.value = 0
+        numberEntry.appendChild(tmp)
+        options.appendChild(numberEntry)
+        seeder = createChoice('Utiliser un seed', false, true)
+        seeder.addEventListener('click', function (e) {
+            if (this.children[0].checked) {
+
+                this.parentNode.querySelector('.seedentry').classList.remove('hidden')
+            }
+            else {
+                this.parentNode.querySelector('.seedentry').classList.add('hidden')
+            }
+        })
+        options.appendChild(seeder)
+        entry = createClassElement('input', 'seedentry', 'hidden')
+        entry.type = 'text'
+        entry.classList.add('seedentry')
+        options.appendChild(entry)
+        container.appendChild(options)
+
+        startButton = createClassElement('button', 'switcher')
+        startButton.innerText = 'Générer'
+        startButton.addEventListener('click', function (e) {
+
+            if (document.querySelector('.seedentry').parentNode.children[3].children[0].checked) {
+                seed = document.querySelector('.seedentry').value
+            }
+            else if (!document.querySelector('.options').children[1].children[0].checked) {seed = getSeed(document.querySelector('input[type=number]').value)}
+            else {seed = getSeed()}
+            createSetFromSeed(seed)
+        })
+        container.appendChild(startButton)
+    }
+
+    function getSeed(size) {
+        prefix = []
+        for (elt of document.querySelectorAll('.answerlist:has(.modtitle)>*>input:checked')
+        ) {
+            for (let i = 0; i < elt.number; i++) {
+                prefix.push([elt.parentNode.parentNode.moduleName, elt.title, i])
+            }
+        }
+        if (size == undefined) {return prefix}
+        seed = []
+        for (let i = 0; i < size; i++) {
+            randomIndex = Math.floor(Math.random() * prefix.length)
+            randomElement = prefix[randomIndex]
+            seed.push(randomElement)
+            prefix.splice(randomIndex, 1)
+        }
+
+
+        return seed.filter(element => element !== undefined)
+
+    }
+
+    function createSetFromSeed(seed) {
+        getAllSources(seed)
+            .then(data => {
+                sources = data
+                content = []
+                for (elt of seed) {
+                    tmp = [elt[0], elt[1]].join(',')
+                    content.push(sources[tmp][elt[2]])
+                }
+                document.querySelector('.container').innerHTML = ""
+                createSet(content)
+            })
+
+
+
+
+
+    }
+
+    function getAllSources(seed) {
+        sources = {}
+        tag: for (elem of seed) {
+            if (!Object.keys(sources).includes([elem[0], elem[1]])) {
+                for (elt of info) {
+                    if ([elt["module"], elt["title"]].join(',') === [elem[0], elem[1]].join(',')) {
+                        sources[[elem[0], elem[1]]] = elt["path"]
+                        continue tag
+                    }
+                }
+            }
+        }
+
+        const promises = [];
+
+        for (const key of Object.keys(sources)) {
+            promises.push(downloadJSON(sources[key]))
+        }
+
+        return Promise.all(promises).then(results => {
+            for (let i = 0; i < results.length; i++) {
+                sources[Object.keys(sources)[i]] = results[i]
+            }
+            return sources
+        })
+    }
+
+    function downloadJSON(arg) {
+        if (arg) {
+            return fetch(arg)
+                .then(response => response.json())
+                .then(data => {
+                    return data
+                })
+        }
+        else {return {"empty": true}}
+    }
+
+
+
+    function hideChoices() {
+        if (this.parentNode.children[1].classList.contains('hidden')) {
+            for (elt of this.parentNode.querySelectorAll(':not(.modtitle)')) {elt.classList.remove('hidden')}
+        }
+        else {
+            for (elt of this.parentNode.querySelectorAll(':not(.modtitle)')) {elt.classList.add('hidden')}
+        }
+    }
+
+
+
+    function getModuleList() {
+        modules = {}
+        for (elt of info) {
+            if (!(elt['module'] in modules)) {
+                modules[elt['module']] = [elt]
+            }
+            else {modules[elt['module']].push(elt)}
+        }
+        return modules
+    }
+
+
+
+    createStartInterface()
+
+
+    Qcm_data = []
+
+    Qcm_data = [qcmType, qrocType, qruType]
+    //console.log(JSON.stringify(Qcm_data))
+    //
+
+
+</script>
