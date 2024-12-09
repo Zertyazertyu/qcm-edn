@@ -1,4 +1,4 @@
 [
-  {"title": "test", "number": 3, "module": "0", "path": "https://raw.githubusercontent.com/Zertyazertyu/qcm-edn/refs/heads/main/data/test.json"}
+  {"title": "QCM d'essai", "number": 3, "module": "Test", "path": "https://raw.githubusercontent.com/Zertyazertyu/qcm-edn/refs/heads/main/data/test.json"}
 
 ]
