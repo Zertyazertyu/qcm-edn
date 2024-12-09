@@ -1,0 +1,21 @@
+[
+{ "type": "qcm",
+  "title": "<p>Un patient âgé de 72 ans, doit faire l’objet d’une intervention chirurgicale lourde. Compte tenu de son passé tabagique(60 PA) des EFR sont réalisées dont voici le résultat.</p><p>Parmi les affirmations suivantes lesquelles s’appliquent-elles à l’examen qui a été réalisé ? (une ou plusieurs réponses possibles)</p><p><img src=\"https://media.discordapp.net/attachments/1048380922971566220/1051610242468819085/f0ebb2224d6f03bd5a46b1efebb98ff10b8ef5f5.png\"></p>",
+  "choices": ["L'examen n'a comporté qu'une spirométrie", "L'examen pratiqué comporte est un test de marche de 6 minutes avec mesure de la SpO2", "L'examen pratiqué comporte est un test de marche de 6 minutes avec mesure de la SpO2", "Un test pharmacologique aux bronchodilatateurs a été pratiqué", "Une étude du transfert du CO au repos a été pratiquée"], 
+  "answers": [false, false, true, true, true], 
+  "feedback": "Les réponses correctes sont: Une étude des volumes non mobilisables (pléthysmgraphie) a été pratiquée, Un test pharmacologique aux bronchodilatateurs a été pratiqué, Une étude du transfert du CO au repos a été pratiquée"
+    },
+  {
+  "type": "qroc",
+  "title": "<div class=\"qtext\"><p>Un patient âgé de 69 ans, fumeur (50 PA) consulte pour dyspnée. Des EFR sont réalisées dont voici le résultat.</p><p>Quelle pathologie pulmonaire chronique rend elle vraisemblablement compte des anomalies observées sur les EFR de ce patient ?</p><p><img src=\"https://media.discordapp.net/attachments/928247821784739850/1052325556177354913/9523d3484c356ca536429e1a1051abd2882fc473.png\"></p></div>", 
+  "responses": [["BPCO"]], 
+  "feedback" : "La réponse correcte est : BPCO"
+    },
+  {
+  "type": "qru",
+  "title": "<div class=\"qtext\"><p>Vers où votre regard se portera-t-il en priorité&nbsp;?</p><p>Un patient âgé de 62 ans se plaint d’une toux sèche évoluant depuis 3 mois, de crachats hémoptoïques plus récents. A l’écouter vous notez une voix bitonale. Il vous montre un cliché de thorax qu’un de vos confrères avait prescrit.</p><br><p><img src=\"https://media.discordapp.net/attachments/928247821784739850/1052325339570896907/034aa1c6a2ad27db446bbe7d33e82372863df000.png\"></p></div>",
+  "choices": ['en 1', 'en 2', 'en 3', 'en 4', 'en 5'],
+  "answer": 1,
+  "feedback": "La symptomatologie fait évoquer une tumeur proximale avec syndrome récurrentiel. On cherche dont une tumeur du hile gauche avec envahissement de la fenêtre aorto-pulmonaire La réponse correcte est: en 2"
+    }
+]
