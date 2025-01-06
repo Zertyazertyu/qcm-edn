@@ -1,7 +1,7 @@
 <head>
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Sides du bled</title>
+    <title>QCM EDN</title>
     <link rel="shortcut icon"
         href="https://media.discordapp.net/attachments/757509431498899496/1043156813954170880/unknown.png" />
 
@@ -25,6 +25,7 @@
         max-width: 1000px;
 
     }
+
 
     .totalofqcm>* {
         display: inline-block;
@@ -97,6 +98,10 @@
         align-items: stretch;
         display: flex;
         background-color: #e0e0e0;
+    }
+
+    .totalofqcm {
+        align-items: center;
     }
 
     .correct {
@@ -181,42 +186,23 @@
 
     </div>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/js-sha256@0.9.0/build/sha256.min.js"></script>
 <script>
 
 
 
-    info = [
-        {"title": "debug0", "number": 3, "module": "test", "path": "https://raw.githubusercontent.com/Zertyazertyu/Sides-du-bled/main/test.json"},
-        {"title": "debug1", "number": 3, "module": "test", "path": undefined},
-        {"title": "debug2", "number": 3, "module": "salut", "path": undefined},
-        {"title": "debug3", "number": 3, "module": "test", "path": undefined}
-    ]
-
-
-
-    qcmType = {
-        'type': 'qcm',
-        'title': "<p>Un patient âgé de 72 ans, doit faire l’objet d’une intervention chirurgicale lourde. Compte tenu de son passé tabagique(60 PA) des EFR sont réalisées dont voici le résultat.</p><p>Parmi les affirmations suivantes lesquelles s’appliquent-elles à l’examen qui a été réalisé ? (une ou plusieurs réponses possibles)</p><p><img src=\"https://media.discordapp.net/attachments/1048380922971566220/1051610242468819085/f0ebb2224d6f03bd5a46b1efebb98ff10b8ef5f5.png\"></p>", 'choices': ["L'examen n'a comporté qu'une spirométrie", "L'examen pratiqué comporte est un test de marche de 6 minutes avec mesure de la SpO2", "L'examen pratiqué comporte est un test de marche de 6 minutes avec mesure de la SpO2", "Un test pharmacologique aux bronchodilatateurs a été pratiqué", "Une étude du transfert du CO au repos a été pratiquée"], 'answers': [false, false, true, true, true], 'feedback': "Les réponses correctes sont: Une étude des volumes non mobilisables (pléthysmgraphie) a été pratiquée, Un test pharmacologique aux bronchodilatateurs a été pratiqué, Une étude du transfert du CO au repos a été pratiquée"
+    async function fetchData(url) {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error("Erreur lors du chargement des données");
+            }
+            return await response.json();
+        } catch (error) {
+            console.error("Une erreur est survenue :", error.message);
+            return null;
+        }
     }
-
-    qrocType = {
-        'type': 'qroc',
-        'title': '<div class="qtext"><p>Un patient âgé de 69 ans, fumeur (50 PA) consulte pour dyspnée. Des EFR sont réalisées dont voici le résultat.</p><p>Quelle pathologie pulmonaire chronique rend elle vraisemblablement compte des anomalies observées sur les EFR de ce patient ?</p><p><img src="https://media.discordapp.net/attachments/928247821784739850/1052325556177354913/9523d3484c356ca536429e1a1051abd2882fc473.png"></p></div>', 'responses': [["BPCO"]], 'feedback': "La réponse correcte est : BPCO"
-
-    }
-
-    qruType = {
-        'type': 'qru',
-        'title': '<div class="qtext"><p>Vers où votre regard se portera-t-il en priorité&nbsp;?</p><p>Un patient âgé de 62 ans se plaint d’une toux sèche évoluant depuis 3 mois, de crachats hémoptoïques plus récents. A l’écouter vous notez une voix bitonale. Il vous montre un cliché de thorax qu’un de vos confrères avait prescrit.</p><br><p><img src="https://media.discordapp.net/attachments/928247821784739850/1052325339570896907/034aa1c6a2ad27db446bbe7d33e82372863df000.png"></p></div>',
-        'choices': ['en 1', 'en 2', 'en 3', 'en 4', 'en 5'],
-        'answer': 1,
-        'feedback': "La symptomatologie fait évoquer une tumeur proximale avec syndrome récurrentiel. On cherche dont une tumeur du hile gauche avec envahissement de la fenêtre aorto-pulmonaire La réponse correcte est: en 2"
-    }
-
-
-
-    correction = false
-
 
     function verify() {
         correction = !correction
@@ -242,42 +228,64 @@
         elemlist = document.querySelectorAll(".answer")
         for (let i = 0; i < elemlist.length; i++) {
             nbfautes = correct(elemlist[i], Qcm_data[i])
-            score = score + betterPoints(nbfautes)
+            score = score + betterPoints(nbfautes, Qcm_data[i])
         }
         return betterDigit(score) + '/' + elemlist.length
     }
 
-
-
     function betterDigit(nb) {
-        nb = nb.toString()
-        if (!nb.includes('.')) {nb = nb + "."}
-        return nb + '0'.repeat(3 - nb.substr(nb.indexOf('.')).length)
+        nb = nb.toString();
+        if (!nb.includes('.')) {nb = nb + '.';}
+        let decimalPart = nb.split('.')[1] || '';
+
+        decimalPart = decimalPart.substring(0, 2);
+        let result = nb.split('.')[0] + '.' + decimalPart;
+
+        if (result.endsWith('.')) {
+            result = result.slice(0, -1);
+        }
+
+        return result;
     }
 
-    function betterPoints(nbfautes) {
-        return ((nbfautes == 0) ? 1 : (nbfautes == 1) ? 0.5 : (nbfautes == 2) ? 0.25 : 0)
+    function betterPoints(nbfautes, qcm) {
+        type = qcm['type']
+        if (type == "qcm") {return ((nbfautes == 0) ? 1 : (nbfautes == 1) ? 0.5 : (nbfautes == 2) ? 0.25 : 0)}
+        else if (type == "qru" || type == "qroc") {return (nbfautes == 0) ? 1 : 0}
+        else if (type == "kfp") {return Math.max(1 - (nbfautes / qcm['nbGoodAnswers']), 0)}
+        //return ((nbfautes == 0) ? 1 : (nbfautes == 1) ? 0.5 : (nbfautes == 2) ? 0.25 : 0)
     }
 
 
     function correct(qcm, ref) {
         nbfautes = 0
-        if (ref['type'] == "qcm") {
+        notAnswered = true
+        if (ref['type'] == "qcm" || ref['type'] == 'kfp') {
             for (let i = 0; i < qcm.children.length; i++) {
                 if (ref['answers'][i]) {
                     if (!(qcm.children[i].children[0].checked)) {
                         qcm.children[i].classList.add('missing')
                         nbfautes++
-                    } else {qcm.children[i].classList.add('correct')}
+                    } else {
+                        qcm.children[i].classList.add('correct')
+                        notAnswered = false
+                    }
                 } else {
                     if (qcm.children[i].children[0].checked) {
                         qcm.children[i].classList.add('wrong')
+                        notAnswered = false
                         nbfautes++
                     }
                 }
             }
             feed = qcm.parentNode.children[3].children[0]
-            tmp = nbfautes + " discordance" + ((nbfautes != 1) ? 's (' : ' (') + betterPoints(nbfautes) + " point" + ((betterPoints(nbfautes) != 1) ? 's).' : ').')
+
+            if (notAnswered) {
+                tmp = "Question non répondue."
+                nbfautes = 5
+            }
+            else {tmp = nbfautes + " discordance" + ((nbfautes != 1) ? 's (' : ' (') + betterDigit(betterPoints(nbfautes, ref)) + " point" + ((betterPoints(nbfautes, ref) != 1) ? 's).' : ').')}
+
             feed.innerText = tmp
         }
         else if (ref['type'] == 'qroc') {
@@ -295,7 +303,7 @@
                 }
             }
             nbfautes = tmp.filter(x => x).length
-            if (ref['responses'].length > nbfautes) {
+            if (ref['responses'].length > nbfautes && content.lenght) {
                 if (!nbfautes) {qcm.children[0].classList.add("correct")}
                 else {qcm.children[0].classList.add("missing")}
             }
@@ -305,7 +313,7 @@
             }
             qcm.parentNode.children[3].classList.remove("hidden")
             feed = qcm.parentNode.children[3].children[0]
-            feed.innerText = betterPoints(nbfautes) + " point" + ((betterPoints(nbfautes) != 1) ? 's.' : '.')
+            feed.innerText = betterPoints(nbfautes, ref) + " point" + ((betterPoints(nbfautes, ref) != 1) ? 's.' : '.')
         }
         else if (ref['type'] == 'qru') {
             for (let i = 0; i < qcm.children.length; i++) {
@@ -328,7 +336,7 @@
 
             if (nbfautes) {nbfautes = 4}
             feed = qcm.parentNode.children[3].children[0]
-            feed.innerText = betterPoints(nbfautes) + " point" + ((betterPoints(nbfautes) != 1) ? 's.' : '.')
+            feed.innerText = betterPoints(nbfautes, ref) + " point" + ((betterPoints(nbfautes, ref) != 1) ? 's.' : '.')
         }
 
         qcm.parentNode.children[3].classList.remove("hidden")
@@ -344,6 +352,12 @@
         return tmp
 
     }
+
+    const getIncrementedNumber = (() => {
+        let counter = 1;
+        return () => counter++;
+    })();
+
     function createQcmElement(qcm) {
         container = document.querySelector(".container")
         newQcm = createClassElement('div', 'question', qcm['type'])
@@ -353,12 +367,13 @@
         qcmFb = createClassElement('div', 'feedback', 'hidden')
         qcmFb.appendChild(createClassElement('div', 'fbtitle'))
         qcmfbb = document.createElement('div')
-        qcmfbb.innerText = qcm['feedback']
+        qcmfbb.innerHTML = qcm['feedback']
         qcmFb.appendChild(qcmfbb)
+        if (qcm['type'] == 'kfp') {qcmTitle.innerHTML += "<p>" + qcm['nbGoodAnswers'] + " bonnes réponses.</p>"}
         newQcm.appendChild(qcmTitle)
-        if (qcm['type'] == 'qcm' || qcm['type'] == 'qru') {
+        if (qcm['type'] == 'qcm' || qcm['type'] == 'qru' || qcm['type'] == 'kfp') {
             qcmChoices = createClassElement('div', 'answerList', 'answer')
-            if (qcm['type'] == 'qru') {radioName = Date.now()}
+            if (qcm['type'] == 'qru') {radioName = getIncrementedNumber()}
             else {radioName = undefined}
             for (let i = 0; i < qcm['choices'].length; i++) {
                 qcmChoices.appendChild(createChoice(qcm['choices'][i], radioName))
@@ -411,7 +426,7 @@
     function createStartInterface() {
         container = document.querySelector('.container')
         title = createClassElement('div', 'info')
-        title.innerText = "Sides du bled"
+        title.innerText = "Qcm EDN"
         container.appendChild(title)
         modules = getModuleList()
         for (key of Object.keys(modules)) {
@@ -426,7 +441,7 @@
                 tmp.classList.add('hidden')
                 tmp.children[0].addEventListener('click', function (e) {
                     for (elt of this.parentNode.parentNode.querySelectorAll("input:not(.selectall)")) {
-                        if (elt.checked != this.checked) {elt.click()}
+                        if (elt.checked != this.checked) elt.click()
                     }
 
                 })
@@ -437,6 +452,8 @@
                 tt = createChoice(target['title'] + ' (' + target['number'] + ')', false, true)
                 tt.children[0].number = target['number']
                 tt.children[0].title = target['title']
+                tt.children[0].url = target['path']
+                tt.classList.add('serial')
                 tt.children[0].addEventListener('click', function (e) {
                     target = this.parentNode.parentNode.querySelector('.modtitle')
                     total = document.querySelector('.totalofqcm').children[2]
@@ -464,15 +481,23 @@
         }
         options = createClassElement('div', "answerList", "options")
         options.appendChild(createChoice('Mode progressif', false, true))
-        sortOption = createChoice('Ne pas mélanger les QCM', false, true)
+        sortOption = createChoice('Utiliser les séries complètes', false, true)
+        sortOption.classList.add("useCompleteSeries")
         sortOption.addEventListener('click', function (e) {
             if (!this.children[0].checked) {
-
                 this.parentNode.querySelector('.totalofqcm').classList.remove('hidden')
+                this.parentNode.querySelector('.useSeedAsk').classList.remove('hidden')
             }
             else {
                 this.parentNode.querySelector('.totalofqcm').classList.add('hidden')
+                this.parentNode.querySelector('.useSeedAsk').classList.add('hidden')
             }
+        })
+        seeder = createChoice('Utiliser un seed', false, true)
+        seeder.classList.add('useSeedAsk')
+        seeder.addEventListener('click', function (e) {
+            if (this.children[0].checked) this.querySelector('.seedentry').classList.remove('hidden')
+            else this.querySelector('.seedentry').classList.add('hidden')
         })
         options.appendChild(sortOption)
         numberEntry = createClassElement("div", "totalofqcm")
@@ -489,115 +514,78 @@
         tmp.value = 0
         numberEntry.appendChild(tmp)
         options.appendChild(numberEntry)
-        seeder = createChoice('Utiliser un seed', false, true)
-        seeder.addEventListener('click', function (e) {
-            if (this.children[0].checked) {
-
-                this.parentNode.querySelector('.seedentry').classList.remove('hidden')
-            }
-            else {
-                this.parentNode.querySelector('.seedentry').classList.add('hidden')
-            }
-        })
         options.appendChild(seeder)
         entry = createClassElement('input', 'seedentry', 'hidden')
         entry.type = 'text'
         entry.classList.add('seedentry')
-        options.appendChild(entry)
+        seeder.appendChild(entry)
         container.appendChild(options)
 
         startButton = createClassElement('button', 'switcher')
         startButton.innerText = 'Générer'
         startButton.addEventListener('click', function (e) {
-
-            if (document.querySelector('.seedentry').parentNode.children[3].children[0].checked) {
-                seed = document.querySelector('.seedentry').value
+            totalnumberOfQCM = document.querySelector('.totalofqcm').children[2].value
+            chosenNumberOfQCM = Math.min(document.querySelector('.totalofqcm').children[1].value, totalnumberOfQCM)
+            if (chosenNumberOfQCM <= 0) {
+                if (totalnumberOfQCM <= 0) return
+                else chosenNumberOfQCM = totalnumberOfQCM
             }
-            else if (!document.querySelector('.options').children[1].children[0].checked) {seed = getSeed(document.querySelector('input[type=number]').value)}
-            else {seed = getSeed()}
-            createSetFromSeed(seed)
+            if (document.querySelector('.useCompleteSeries').children[0].checked) {
+                model = Array.from({length: totalnumberOfQCM}, (_, i) => i)
+            } else {
+                if (document.querySelector('.useSeedAsk').children[0].checked) {
+                    seed = document.querySelector('.seedentry').value
+                    if (seed.length == 0) seed = 'DEFAULT'
+                } else {seed = 'DEFAULT'}
+                model = getModelFromSeed(seed, totalnumberOfQCM).slice(0, chosenNumberOfQCM)
+            }
+            createSetFromModel(model)
         })
         container.appendChild(startButton)
     }
 
-    function getSeed(size) {
-        prefix = []
-        for (elt of document.querySelectorAll('.answerlist:has(.modtitle)>*>input:checked')
-        ) {
-            for (let i = 0; i < elt.number; i++) {
-                prefix.push([elt.parentNode.parentNode.moduleName, elt.title, i])
-            }
+
+
+
+    function getModelFromSeed(seed, length) {
+        const hash = sha256.array(seed)
+
+        let number = 0
+        for (let i = 0; i < 4; i++) {number |= hash[i] << (8 * i)}
+        const arrCopy = Array.from({length: length}, (_, index) => index)
+
+        let j
+        let randomValue
+        for (let i = arrCopy.length - 1; i > 0; i--) {
+            randomValue = Math.sin(number + i) * 10000
+            j = Math.floor(Math.abs(randomValue - Math.floor(randomValue)) * (i + 1))
+            [arrCopy[i], arrCopy[j]] = [arrCopy[j], arrCopy[i]]
         }
-        if (size == undefined) {return prefix}
-        seed = []
-        for (let i = 0; i < size; i++) {
-            randomIndex = Math.floor(Math.random() * prefix.length)
-            randomElement = prefix[randomIndex]
-            seed.push(randomElement)
-            prefix.splice(randomIndex, 1)
-        }
-
-
-        return seed.filter(element => element !== undefined)
-
+        return arrCopy;
     }
 
-    function createSetFromSeed(seed) {
-        getAllSources(seed)
-            .then(data => {
-                sources = data
-                content = []
-                for (elt of seed) {
-                    tmp = [elt[0], elt[1]].join(',')
-                    content.push(sources[tmp][elt[2]])
-                }
+
+    function createSetFromModel(model) {
+
+        const correspundingIndexes = []
+        const resToLoad = []
+
+        for (elt of document.querySelectorAll('.serial>input[type="checkbox"]:checked')) {
+            resToLoad.push(elt.url)
+            for (let i = 0; i < elt.number; i++) {correspundingIndexes.push([i, resToLoad.length - 1])}
+        }
+
+        for (let i = 0; i < model.length; i++) {model[i] = correspundingIndexes[model[i]]}
+        for (let i = 0; i < resToLoad.length; i++) {resToLoad[i] = fetchData(resToLoad[i])}
+
+        Promise.all(resToLoad)
+            .then(loadedRes => {
+                for (let i = 0; i < model.length; i++) {model[i] = loadedRes[model[i][1]][model[i][0]]}
                 document.querySelector('.container').innerHTML = ""
-                createSet(content)
+                createSet(model)
             })
-
-
-
-
-
     }
 
-    function getAllSources(seed) {
-        sources = {}
-        tag: for (elem of seed) {
-            if (!Object.keys(sources).includes([elem[0], elem[1]])) {
-                for (elt of info) {
-                    if ([elt["module"], elt["title"]].join(',') === [elem[0], elem[1]].join(',')) {
-                        sources[[elem[0], elem[1]]] = elt["path"]
-                        continue tag
-                    }
-                }
-            }
-        }
-
-        const promises = [];
-
-        for (const key of Object.keys(sources)) {
-            promises.push(downloadJSON(sources[key]))
-        }
-
-        return Promise.all(promises).then(results => {
-            for (let i = 0; i < results.length; i++) {
-                sources[Object.keys(sources)[i]] = results[i]
-            }
-            return sources
-        })
-    }
-
-    function downloadJSON(arg) {
-        if (arg) {
-            return fetch(arg)
-                .then(response => response.json())
-                .then(data => {
-                    return data
-                })
-        }
-        else {return {"empty": true}}
-    }
 
 
 
@@ -614,25 +602,21 @@
 
     function getModuleList() {
         modules = {}
-        for (elt of info) {
-            if (!(elt['module'] in modules)) {
-                modules[elt['module']] = [elt]
-            }
+        for (elt of index) {
+            if (!(elt['module'] in modules)) modules[elt['module']] = [elt]
             else {modules[elt['module']].push(elt)}
         }
         return modules
     }
 
 
+    let correction = false;
 
-    createStartInterface()
+    (async () => {
+        index = await fetchData("https://raw.githubusercontent.com/Zertyazertyu/qcm-edn/main/index.json")
+        createStartInterface()
+    })()
 
-
-    Qcm_data = []
-
-    Qcm_data = [qcmType, qrocType, qruType]
-    //console.log(JSON.stringify(Qcm_data))
-    //
 
 
 </script>
