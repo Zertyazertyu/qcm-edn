@@ -1,6 +1,1 @@
-[
-  {"title": "QCM d'essai", "number": 3, "module": "Test", "path": "https://raw.githubusercontent.com/Zertyazertyu/qcm-edn/refs/heads/main/data/test.json"},
-{"title": "QCM d'essai", "number": 3, "module": "Test2", "path": "https://raw.githubusercontent.com/Zertyazertyu/qcm-edn/refs/heads/main/data/test.json"},
-  {"title": "QCM d'essai2", "number": 3, "module": "Test", "path": "https://raw.githubusercontent.com/Zertyazertyu/qcm-edn/refs/heads/main/data/test.json"},
-  {"title": "QCM d'essai2", "number": 3, "module": "Test2", "path": "https://raw.githubusercontent.com/Zertyazertyu/qcm-edn/refs/heads/main/data/test.json"}
-]
+[[{"title": "001 - La relation m\u00e9decin-malade : communication, formation et personnalisation de la prise en charge m\u00e9dicale", "number": 28, "module": "[ECNI] Sant\u00e9 Publique", "path": "https://github.com/Zertyazertyu/qcm-edn//raw/main/data/{title}.json"}], [{"title": "014 - La mort", "number": 1, "module": "[ECNI] Sant\u00e9 Publique", "path": "https://github.com/Zertyazertyu/qcm-edn//raw/main/data/{title}.json"}], [{"title": "007 - Les droits individuels et collectifs du patient", "number": 2, "module": "[ECNI] Sant\u00e9 Publique", "path": "https://github.com/Zertyazertyu/qcm-edn//raw/main/data/{title}.json"}]]
