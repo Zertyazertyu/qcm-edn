@@ -380,6 +380,7 @@
                 choice.maxSelection = qcm['nbGoodAnswers']
                 if (qcm['type'] == 'kfp') {
                     choice.children[0].addEventListener('click', function(e){
+                        console.log('Clicked')
                         checkedCount = 0;
                         grandpa = this.parentNode.parentNode;
                         for (let i = 0; i< grandpa.children.lenght; i++){
