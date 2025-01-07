@@ -386,7 +386,7 @@
                             if (grandpa.children[i].children[0].checked) { checkedCount++; }
                         }
 
-                        if (checkedCount >= this.parentNode.maxSelection) { this.checked = false; }
+                        if (checkedCount > this.parentNode.maxSelection) { this.checked = false; }
                         
                         
                     })
