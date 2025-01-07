@@ -303,14 +303,14 @@
                 }
             }
             nbfautes = tmp.filter(x => x).length
-            if (ref['responses'].length > nbfautes && content.length) {
-                if (!nbfautes) {qcm.children[0].classList.add("correct")}
-                else {qcm.children[0].classList.add("missing")}
-            }
-            else {
+            
+            if (ref['responses'].length <= nbfautes || content.length == 0) {
                 qcm.children[0].classList.add("wrong")
                 nbfautes = 4
-            }
+            } else if (!nbfautes) {qcm.children[0].classList.add("correct")}
+            else {qcm.children[0].classList.add("missing")}
+
+            
             qcm.parentNode.children[3].classList.remove("hidden")
             feed = qcm.parentNode.children[3].children[0]
             feed.innerText = betterPoints(nbfautes, ref) + " point" + ((betterPoints(nbfautes, ref) != 1) ? 's.' : '.')
