@@ -369,7 +369,7 @@
         qcmfbb = document.createElement('div')
         qcmfbb.innerHTML = qcm['feedback']
         qcmFb.appendChild(qcmfbb)
-        if (qcm['type'] == 'kfp') {qcmTitle.innerHTML += "<p><b>" + qcm['nbGoodAnswers'] + " bonnes réponses.</b></p>"}
+        if (qcm['type'] == 'kfp') {qcmTitle.innerHTML += "<p><b>" + qcm['nbGoodAnswers'] + " réponses attendues.</b></p>"}
         newQcm.appendChild(qcmTitle)
         if (qcm['type'] == 'qcm' || qcm['type'] == 'qru' || qcm['type'] == 'kfp') {
             qcmChoices = createClassElement('div', 'answerList', 'answer')
