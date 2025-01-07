@@ -432,7 +432,7 @@
 
     function createSet(data, progressive_mode) {
         if (progressive_mode) {
-            
+
         }
         else {
             Qcm_data = data
@@ -517,7 +517,7 @@
                 this.parentNode.querySelector('.useSeedAsk').classList.add('hidden')
             }
         })
-        seeder = createChoice('Utiliser un seed', false, true)
+        seeder = createChoice('Mélanger la série', false, true)
         seeder.classList.add('useSeedAsk')
         seeder.addEventListener('click', function (e) {
             if (this.children[0].checked) this.querySelector('.seedentry').classList.remove('hidden')
@@ -541,6 +541,7 @@
         options.appendChild(seeder)
         entry = createClassElement('input', 'seedentry', 'hidden')
         entry.type = 'text'
+        entry.placeholder = "Entez le seed"
         entry.classList.add('seedentry')
         seeder.appendChild(entry)
         container.appendChild(options)
