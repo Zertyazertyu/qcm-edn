@@ -430,14 +430,19 @@
     }
 
 
-    function createSet(data, serial = false) {
-        Qcm_data = data
-        document.querySelector('.container').appendChild(createClassElement('div', 'result', 'hidden'))
-        for (elem of Qcm_data) {createQcmElement(elem)}
-        button = createClassElement('button', 'switcher')
-        button.innerText = "Corriger"
-        button.onclick = verify
-        document.querySelector(".container").appendChild(button)
+    function createSet(data, progressive_mode) {
+        if (progressive_mode) {
+            
+        }
+        else {
+            Qcm_data = data
+            document.querySelector('.container').appendChild(createClassElement('div', 'result', 'hidden'))
+            for (elem of Qcm_data) {createQcmElement(elem)}
+            button = createClassElement('button', 'switcher')
+            button.innerText = "Corriger"
+            button.onclick = verify
+            document.querySelector(".container").appendChild(button)
+        }
     }
 
     function createStartInterface() {
@@ -497,7 +502,9 @@
             container.appendChild(moduleContainer)
         }
         options = createClassElement('div', "answerList", "options")
-        options.appendChild(createChoice('Mode progressif', false, true))
+        progressiveMode = createChoice('Mode progressif', false, true)
+        progressiveMode.classList.add('progressiveMode')
+        options.appendChild(progressiveMode)
         sortOption = createChoice('Utiliser les séries complètes', false, true)
         sortOption.classList.add("useCompleteSeries")
         sortOption.addEventListener('click', function (e) {
@@ -556,7 +563,7 @@
                 } else {seed = 'DEFAULT'}
                 model = getModelFromSeed(seed, totalnumberOfQCM).slice(0, chosenNumberOfQCM)
             }
-            createSetFromModel(model)
+            createSetFromModel(model, document.querySelector('.progressiveMode').children[0].checked)
         })
         container.appendChild(startButton)
     }
@@ -582,7 +589,7 @@
     }
 
 
-    function createSetFromModel(model) {
+    function createSetFromModel(model, progressive_mode) {
 
         const correspundingIndexes = []
         const resToLoad = []
@@ -599,7 +606,7 @@
             .then(loadedRes => {
                 for (let i = 0; i < model.length; i++) {model[i] = loadedRes[model[i][1]][model[i][0]]}
                 document.querySelector('.container').innerHTML = ""
-                createSet(model)
+                createSet(model, progressive_mode)
             })
     }
 
