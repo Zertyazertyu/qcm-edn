@@ -369,7 +369,7 @@
         qcmfbb = document.createElement('div')
         if (qcm['type'] == 'qroc') {
             suffix = (qcm['responses'].length > 1) ? 's' : ''
-            qcmfbb.innerHTML = '<b>Réponse' + suffix + ' attendue' + suffix + ' ' + qcm['responses'].join(', ') +'</b>'
+            qcmfbb.innerHTML = '<p><b>Réponse' + suffix + ' attendue' + suffix + ': ' + qcm['responses'].join(', ') +'</b></p>'
         } qcmfbb.innerHTML += qcm['feedback'] 
         qcmFb.appendChild(qcmfbb)
         if (qcm['type'] == 'kfp') {qcmTitle.innerHTML += "<p><b>" + qcm['nbGoodAnswers'] + " réponses attendues.</b></p>"}
