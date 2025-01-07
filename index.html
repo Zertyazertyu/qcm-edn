@@ -303,7 +303,7 @@
                 }
             }
             nbfautes = tmp.filter(x => x).length
-            if (ref['responses'].length > nbfautes && content.length) {
+            if (ref['responses'].length > nbfautes) {
                 if (!nbfautes) {qcm.children[0].classList.add("correct")}
                 else {qcm.children[0].classList.add("missing")}
             }
