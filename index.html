@@ -367,7 +367,7 @@
         qcmFb = createClassElement('div', 'feedback', 'hidden')
         qcmFb.appendChild(createClassElement('div', 'fbtitle'))
         qcmfbb = document.createElement('div')
-        qcmfbb.innerHTML = qcm['feedback']
+        qcmfbb.innerHTML = (qcm['type'] == 'qroc')? '<b>Réponses attendues: '+ qcm['responses'].joint(', ') +'+'</b>' : '' + qcm['feedback']
         qcmFb.appendChild(qcmfbb)
         if (qcm['type'] == 'kfp') {qcmTitle.innerHTML += "<p><b>" + qcm['nbGoodAnswers'] + " réponses attendues.</b></p>"}
         newQcm.appendChild(qcmTitle)
