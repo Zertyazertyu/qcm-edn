@@ -379,6 +379,7 @@
                 choice = createChoice(qcm['choices'][i], radioName)
                 choice.maxSelection = qcm['nbGoodAnswers']
                 if (qcm['type'] == 'kfp') {
+                    console.log('Adding listener')
                     choice.children[0].addEventListener('click', function(e){
                         console.log('Clicked')
                         checkedCount = 0;
