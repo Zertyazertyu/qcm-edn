@@ -519,6 +519,7 @@
         })
         seeder = createChoice('Mélanger la série', false, true)
         seeder.classList.add('useSeedAsk')
+        seeder.children[0].checked = true
         seeder.addEventListener('click', function (e) {
             if (this.children[0].checked) this.querySelector('.seedentry').classList.remove('hidden')
             else this.querySelector('.seedentry').classList.add('hidden')
