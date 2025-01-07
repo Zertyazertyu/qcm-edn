@@ -303,7 +303,7 @@
                 }
             }
             nbfautes = tmp.filter(x => x).length
-            if (ref['responses'].length > nbfautes && content.lenght) {
+            if (ref['responses'].length > nbfautes && content.length) {
                 if (!nbfautes) {qcm.children[0].classList.add("correct")}
                 else {qcm.children[0].classList.add("missing")}
             }
@@ -367,7 +367,11 @@
         qcmFb = createClassElement('div', 'feedback', 'hidden')
         qcmFb.appendChild(createClassElement('div', 'fbtitle'))
         qcmfbb = document.createElement('div')
-        qcmfbb.innerHTML = (qcm['type'] == 'qroc')? '<b>Réponses attendues: '+ qcm['responses'].join(', ') +'</b>' : '' + qcm['feedback']
+        if ((qcm['type'] == 'qroc') {
+            suffix = (qcm['responses'].length > 1) ? 's' : ''
+            qcmfbb.innerHTML = '<b>Réponse' + suffix + 'attendue' + suffix + qcm['responses'].join(', ') +'</b>'
+        } else { qcmfbb.innerHTML = qcm['feedback'] }
+        qcmfbb.innerHTML = (qcm['type'] == 'qroc')?  : '' + 
         qcmFb.appendChild(qcmfbb)
         if (qcm['type'] == 'kfp') {qcmTitle.innerHTML += "<p><b>" + qcm['nbGoodAnswers'] + " réponses attendues.</b></p>"}
         newQcm.appendChild(qcmTitle)
