@@ -55,7 +55,11 @@
         min-height: 20px;
     }
 
-
+    a {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    display: block;
+}
 
     .info {
 
@@ -142,16 +146,20 @@
 
 
     .result {
+        position: sticky;
+        top: 0;
         border-bottom: 3px dashed #d0d0d0;
         padding: 10px;
         color: #212529;
         font-weight: 700;
+        opacity: 1;
+        background-color: white;
+        z-index: 1000;
 
     }
 
     .field {
         padding: 15px;
-
 
     }
 
@@ -220,6 +228,34 @@
         }
         elemlist = document.querySelectorAll("input")
         for (elem of elemlist) {elem.disabled = correction}
+
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function correctAndNext() {
+        result = document.querySelector('.result')
+        elemlist = document.querySelectorAll(".answer")
+        score = 0
+        nbCorrected = elemlist.length;
+        for (let i = 0; i < elemlist.length; i++) {
+
+            if (elemlist[i].parentNode.classList.contains('hidden')) {
+                elemlist[i].parentNode.classList.remove('hidden')
+                nbCorrected = i
+                break
+            } 
+
+            score += betterPoints(correct(elemlist[i], Qcm_data[i]), Qcm_data[i])
+            for (elem of elemlist[i].querySelectorAll('input')) { elem.disabled = true }
+
+        } 
+        if (nbCorrected == elemlist.length) { document.querySelector('.switcher').classList.add('hidden') }
+
+        resultDisplay = document.querySelector('.result')
+        resultDisplay.innerText = "Résultat: " + betterDigit(score) + '/' + nbCorrected
+        resultDisplay.classList.remove('hidden')
+
+        window.scrollTo(0, document.body.scrollHeight);
 
     }
 
@@ -431,19 +467,34 @@
 
 
     function createSet(data, progressive_mode) {
+        Qcm_data = data
+        document.querySelector('.container').appendChild(createClassElement('div', 'result', 'hidden'))
+
+        for (elem of Qcm_data) {createQcmElement(elem)}
+
         if (progressive_mode) {
 
-        }
-        else {
-            Qcm_data = data
-            document.querySelector('.container').appendChild(createClassElement('div', 'result', 'hidden'))
-            for (elem of Qcm_data) {createQcmElement(elem)}
-            button = createClassElement('button', 'switcher')
-            button.innerText = "Corriger"
-            button.onclick = verify
-            document.querySelector(".container").appendChild(button)
-        }
+            searchlist = document.querySelectorAll(".question")
+
+            for (let i = 0; i < searchlist.length; i++ ) {
+                if (i > 0) { searchlist[i].classList.add('hidden') }
+            }
+
+            nextButton = createClassElement('button', 'switcher')
+            nextButton.innerText = "Suivant"
+            nextButton.onclick = correctAndNext
+            document.querySelector(".container").appendChild(nextButton)
+
+        } else { 
+            verifyButton = createClassElement('button', 'switcher')
+            verifyButton.innerText = "Corriger"
+            verifyButton.onclick = verify
+            document.querySelector(".container").appendChild(verifyButton)
+            }
     }
+
+
+
 
     function createStartInterface() {
         container = document.querySelector('.container')
