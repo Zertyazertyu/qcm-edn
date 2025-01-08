@@ -255,8 +255,6 @@
         resultDisplay.innerText = "Résultat: " + betterDigit(score) + '/' + nbCorrected
         resultDisplay.classList.remove('hidden')
 
-        //window.scrollTo(0, document.body.scrollHeight);
-
     }
 
     function getUserScore() {
@@ -487,7 +485,7 @@
 
             centrer = createClassElement('div')
             centrer.style.height = '30vh';
-            document.querySelector(".container").appendChild(centrer);
+            document.body.appendChild(centrer);
 
         } else { 
             verifyButton = createClassElement('button', 'switcher')
