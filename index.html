@@ -485,6 +485,10 @@
             nextButton.onclick = correctAndNext
             document.querySelector(".container").appendChild(nextButton)
 
+            centrer = createClassElement('div')
+            centrer.style.height = '30vh';
+            document.querySelector(".container").appendChild(centrer);
+
         } else { 
             verifyButton = createClassElement('button', 'switcher')
             verifyButton.innerText = "Corriger"
