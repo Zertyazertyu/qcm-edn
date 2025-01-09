@@ -201,10 +201,23 @@
             if (!response.ok) {
                 throw new Error("Erreur lors du chargement des données");
             }
-            return await response.json();
+            return await decompressData(response);
         } catch (error) {
             console.error("Une erreur est survenue :", error.message);
             return null;
+        }
+    }
+
+    async function decompressData(response) {
+        const buffer = await response.arrayBuffer();
+        try {
+            const stream = new Response(buffer).body.pipeThrough(new DecompressionStream("gzip"));
+            const decompressedBuffer = await new Response(stream).arrayBuffer();
+
+            const text = new TextDecoder().decode(decompressedBuffer);
+            return JSON.parse(text);
+        } catch (error) {
+            return JSON.parse(new TextDecoder().decode(buffer));
         }
     }
 
@@ -693,7 +706,7 @@
     let correction = false;
 
     (async () => {
-        index = await fetchData("https://raw.githubusercontent.com/Zertyazertyu/qcm-edn/main/index.json")
+        index = await fetchData("https://raw.githubusercontent.com/Zertyazertyu/qcm-edn/main/index.gz")
         createStartInterface()
     })()
 
