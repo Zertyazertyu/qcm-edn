@@ -520,8 +520,8 @@
             }
             for (elt in modules[key]) {
                 target = modules[key][elt]
-                tt = createChoice(target['title'] + ' (' + target['number'] + ')', false, true)
-                tt.children[0].number = target['number']
+                tt = createChoice(target['title'] + ' (' + target['size'] + ')', false, true)
+                tt.children[0].quantity = target['size']
                 tt.children[0].title = target['title']
                 tt.children[0].url = target['path']
                 tt.classList.add('serial')
@@ -529,19 +529,19 @@
                     target = this.parentNode.parentNode.querySelector('.modtitle')
                     total = document.querySelector('.totalofqcm').children[2]
                     if (this.checked) {
-                        target.count += this.number
-                        total.value += this.number
+                        target.count += this.quantity
+                        total.value += this.quantity
                     }
                     else {
-                        target.count -= this.number
-                        total.value -= this.number
+                        target.count -= this.quantity
+                        total.value -= this.quantity
                     }
                     target.innerText = target.baseText.replace("<?>", target.count)
                     total.innerText = total.baseText.replace("<?>", total.value)
                 })
                 tt.classList.add('hidden')
                 moduleContainer.appendChild(tt)
-                nbContent = nbContent + target['number']
+                nbContent = nbContent + target['size']
 
             }
             moduleTitle.count = 0
@@ -606,6 +606,7 @@
                 else chosenNumberOfQCM = totalnumberOfQCM
             }
             if (document.querySelector('.useCompleteSeries').children[0].checked) {
+                console.log('Series completes dans lordre')
                 model = Array.from({length: totalnumberOfQCM}, (_, i) => i)
             } else {
                 if (document.querySelector('.useSeedAsk').children[0].checked) {
@@ -623,19 +624,23 @@
 
 
     function getModelFromSeed(seed, length) {
-        const hash = sha256.array(seed)
-
-        let number = 0
-        for (let i = 0; i < 4; i++) {number |= hash[i] << (8 * i)}
-        const arrCopy = Array.from({length: length}, (_, index) => index)
-
-        let j
-        let randomValue
-        for (let i = arrCopy.length - 1; i > 0; i--) {
-            randomValue = Math.sin(number + i) * 10000
-            j = Math.floor(Math.abs(randomValue - Math.floor(randomValue)) * (i + 1))
-            [arrCopy[i], arrCopy[j]] = [arrCopy[j], arrCopy[i]]
+        const hash = sha256.array(seed.toLowerCase());
+    
+        let state = hash.slice(0, 4).reduce((acc, val, i) => acc | (val << (8 * i)), 0);
+        function random() {
+            state ^= state << 13;
+            state ^= state >> 17;
+            state ^= state << 5;
+            return (state >>> 0) / 0xFFFFFFFF;
         }
+    
+        const arrCopy = Array.from({ length }, (_, index) => index);
+    
+        for (let i = arrCopy.length - 1; i > 0; i--) {
+            const j = Math.floor(random() * (i + 1));
+            [arrCopy[i], arrCopy[j]] = [arrCopy[j], arrCopy[i]];
+        }
+        
         return arrCopy;
     }
 
@@ -647,7 +652,7 @@
 
         for (elt of document.querySelectorAll('.serial>input[type="checkbox"]:checked')) {
             resToLoad.push(elt.url)
-            for (let i = 0; i < elt.number; i++) {correspundingIndexes.push([i, resToLoad.length - 1])}
+            for (let i = 0; i < elt.quantity; i++) {correspundingIndexes.push([i, resToLoad.length - 1])}
         }
 
         for (let i = 0; i < model.length; i++) {model[i] = correspundingIndexes[model[i]]}
