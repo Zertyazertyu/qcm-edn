@@ -296,9 +296,25 @@
         if (type == "qcm") {return ((nbfautes == 0) ? 1 : (nbfautes == 1) ? 0.5 : (nbfautes == 2) ? 0.2 : 0)}
         else if (type == "qru" || type == "qroc") {return (nbfautes == 0) ? 1 : 0}
         else if (type == "kfp") {return Math.max(1 - (nbfautes / qcm['nbGoodAnswers']), 0)}
-        //return ((nbfautes == 0) ? 1 : (nbfautes == 1) ? 0.5 : (nbfautes == 2) ? 0.25 : 0)
     }
 
+    function levenshteinDistance(a, b) {
+        const matrix = Array.from({ length: a.length + 1 }, (_, i) => 
+            Array.from({ length: b.length + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0))
+        );
+    
+        for (let i = 1; i <= a.length; i++) {
+            for (let j = 1; j <= b.length; j++) {
+                const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j] + 1,      
+                    matrix[i][j - 1] + 1,      
+                    matrix[i - 1][j - 1] + cost
+                );
+            }
+        }
+        return matrix[a.length][b.length];
+    }
 
     function correct(qcm, ref) {
         nbfautes = 0
@@ -332,27 +348,23 @@
             feed.innerText = tmp
         }
         else if (ref['type'] == 'qroc') {
-            content = qcm.children[0].value.toLowerCase().replace(/^;+|;+$| /g, '').split(/;+/)
-            tmp = JSON.parse(JSON.stringify(ref['responses']).toLowerCase())
-            for (0; content.length > tmp.length; tmp.push([undefined])) {}
-            shift = 0
-            for (let i = 0; i < tmp.length; i++) {
-                for (const terme of content) {
-                    if (tmp[i].includes(terme)) {
-                        delete tmp[i]
-                        shift++
-                        break
-                    }
+            content = qcm.children[0].value.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            
+            isCorrect = false
+            for (const term of ref['responses']) {
+                const normalizedTerm = term.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                if (levenshteinDistance(content, term) <= 2) {
+                    isCorrect = true 
+                    break
                 }
             }
-            nbfautes = tmp.filter(x => x).length
-            
-            if (ref['responses'].length <= nbfautes || qcm.children[0].value.length == 0) {
-                qcm.children[0].classList.add("wrong")
-                nbfautes = 4
-            } else if (!nbfautes) {qcm.children[0].classList.add("correct")}
-            else {qcm.children[0].classList.add("missing")}
 
+            if (isCorrect && content.length) {
+                qcm.children[0].classList.add("correct")
+            } else {
+                qcm.children[0].classList.add("wrong")
+                nbfautes = 1
+            }
 
             qcm.parentNode.children[3].classList.remove("hidden")
             feed = qcm.parentNode.children[3].children[0]
