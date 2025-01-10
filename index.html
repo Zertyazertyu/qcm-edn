@@ -293,7 +293,7 @@
 
     function betterPoints(nbfautes, qcm) {
         type = qcm['type']
-        if (type == "qcm") {return ((nbfautes == 0) ? 1 : (nbfautes == 1) ? 0.5 : (nbfautes == 2) ? 0.25 : 0)}
+        if (type == "qcm") {return ((nbfautes == 0) ? 1 : (nbfautes == 1) ? 0.5 : (nbfautes == 2) ? 0.2 : 0)}
         else if (type == "qru" || type == "qroc") {return (nbfautes == 0) ? 1 : 0}
         else if (type == "kfp") {return Math.max(1 - (nbfautes / qcm['nbGoodAnswers']), 0)}
         //return ((nbfautes == 0) ? 1 : (nbfautes == 1) ? 0.5 : (nbfautes == 2) ? 0.25 : 0)
@@ -317,7 +317,7 @@
                     if (qcm.children[i].children[0].checked) {
                         qcm.children[i].classList.add('wrong')
                         notAnswered = false
-                        if (!ref['type'] == 'kfp') { nbfautes++ }
+                        if (ref['type'] != 'kfp') { nbfautes++ }
                     }
                 }
             }
