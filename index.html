@@ -353,13 +353,13 @@
             isCorrect = false
             for (const term of ref['responses']) {
                 const normalizedTerm = term.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-                if (levenshteinDistance(content, term) <= 2) {
+                if (levenshteinDistance(content, normalizedTerm) < Math.min(2, content.length)) {
                     isCorrect = true 
                     break
                 }
             }
 
-            if (isCorrect && content.length) {
+            if (isCorrect) {
                 qcm.children[0].classList.add("correct")
             } else {
                 qcm.children[0].classList.add("wrong")
