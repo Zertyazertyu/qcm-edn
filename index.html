@@ -707,7 +707,7 @@
 
     function getModuleList() {
         modules = {}
-        for (elt of index) {
+        for (elt of index['qcm']) {
             if (!(elt['module'] in modules)) modules[elt['module']] = [elt]
             else {modules[elt['module']].push(elt)}
         }
