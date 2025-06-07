@@ -195,6 +195,15 @@
         margin-right: 5px;
         margin-bottom: 5px;
     }
+    .seepdf {
+        white-space: nowrap;
+        font-style: italic;          
+        text-decoration: underline;  
+        border: 3px dashed #d0d0d0;   
+        display: inline-block;       
+        padding: 2px 6px;
+        
+    }
 </style>
 
 <body>
@@ -344,6 +353,7 @@
     function correct(qcm, ref) {
         nbfautes = 0
         notAnswered = true
+
         if (ref['type'] == "qcm" || ref['type'] == 'kfp') {
             for (let i = 0; i < qcm.children.length; i++) {
                 if (ref['answers'][i]) {
@@ -483,6 +493,10 @@
             field.type = 'text'
             qrocResponse.appendChild(field)
             newQcm.appendChild(qrocResponse)
+        } else {
+            textelement = createClassElement('text')
+            textelement.innerHTML = '(Qcm <b>'+qcm['type']+'</b> ignoré)'
+            qcmTitle.appendChild(textelement)
         }
         newQcm.appendChild(qcmFb)
         container.appendChild(newQcm)
@@ -553,12 +567,6 @@
             elem.onclick = changemode
             modemenu.appendChild(elem)
         } 
-        
-            elem = createClassElement('button', 'modechoice')
-            elem.innerText = "test" + " (0)"
-            elem.mode = "test"
-            elem.onclick = changemode
-            modemenu.appendChild(elem)
 
         settings.appendChild(modemenu)
 
@@ -570,56 +578,10 @@
         title = createClassElement('div', 'info')
         title.innerText = "Mode "+mode
         container.appendChild(title)
-        modules = getModuleList()
-        for (key of Object.keys(modules)) {
-            moduleContainer = createClassElement('div', "answerList")
-            moduleContainer.moduleName = key
-            moduleTitle = createClassElement('div', "modtitle")
-            moduleContainer.appendChild(moduleTitle)
-            nbContent = 0
-            if (modules[key].length > 1) {
-                tmp = createChoice("Tout sélectionner/retirer", false, true)
-                tmp.children[0].classList.add('selectall')
-                tmp.classList.add('hidden')
-                tmp.children[0].addEventListener('click', function (e) {
-                    for (elt of this.parentNode.parentNode.querySelectorAll("input:not(.selectall)")) {
-                        if (elt.checked != this.checked) elt.click()
-                    }
-
-                })
-                moduleContainer.appendChild(tmp)
-            }
-            for (elt in modules[key]) {
-                target = modules[key][elt]
-                tt = createChoice(target['title'] + ' (' + target['size'] + ')', false, true)
-                tt.children[0].quantity = target['size']
-                tt.children[0].title = target['title']
-                tt.children[0].url = target['path']
-                tt.classList.add('serial')
-                tt.children[0].addEventListener('click', function (e) {
-                    target = this.parentNode.parentNode.querySelector('.modtitle')
-                    total = document.querySelector('.totalofqcm').children[2]
-                    if (this.checked) {
-                        target.count += this.quantity
-                        total.value += this.quantity
-                    }
-                    else {
-                        target.count -= this.quantity
-                        total.value -= this.quantity
-                    }
-                    target.innerText = target.baseText.replace("<?>", target.count)
-                    total.innerText = total.baseText.replace("<?>", total.value)
-                })
-                tt.classList.add('hidden')
-                moduleContainer.appendChild(tt)
-                nbContent = nbContent + target['size']
-
-            }
-            moduleTitle.count = 0
-            moduleTitle.baseText = key + ': <?>/' + nbContent + " QCM"
-            moduleTitle.innerText = key + ': 0/' + nbContent + " QCM"
-            moduleTitle.addEventListener('click', hideChoices)
-            container.appendChild(moduleContainer)
+        if (mode == 'qcm'){
+            createFreeQuestionStartInterface(container)
+        } else if (mode == 'lca' || mode == 'dp'){
+            container.appendChild(createProgressiveQuestionsStartInteface())
         }
         options = createClassElement('div', "answerList", "options")
         progressiveMode = createChoice('Mode progressif', false, true)
@@ -667,6 +629,15 @@
         seeder.appendChild(entry)
         container.appendChild(options)
 
+        if (mode == 'dp' || mode == 'lca') {
+            progressiveMode.children[0].disabled = true
+            progressiveMode.children[0].checked = true
+
+            document.querySelector('.useCompleteSeries').children[0].checked = true
+            document.querySelector('.useCompleteSeries').children[0].disabled = true
+            document.querySelector('.useCompleteSeries').click()
+        }
+
         startButton = createClassElement('button', 'switcher')
         startButton.innerText = 'Générer'
         startButton.addEventListener('click', function (e) {
@@ -677,7 +648,6 @@
                 else chosenNumberOfQCM = totalnumberOfQCM
             }
             if (document.querySelector('.useCompleteSeries').children[0].checked) {
-                console.log('Series completes dans lordre')
                 model = Array.from({length: totalnumberOfQCM}, (_, i) => i)
             } else {
                 if (document.querySelector('.useSeedAsk').children[0].checked) {
@@ -691,8 +661,81 @@
         container.appendChild(startButton)
     }
 
+    function createFreeQuestionStartInterface(container) {
+        modules = getModuleList()
+        for (key of Object.keys(modules)) {
+            moduleContainer = createClassElement('div', "answerList")
+            moduleContainer.moduleName = key
+            moduleTitle = createClassElement('div', "modtitle")
+            moduleContainer.appendChild(moduleTitle)
+            nbContent = 0
+            if (modules[key].length > 1) {
+                tmp = createChoice("Tout sélectionner/retirer", false, true)
+                tmp.children[0].classList.add('selectall')
+                tmp.classList.add('hidden')
+                tmp.children[0].addEventListener('click', function (e) {
+                    for (elt of this.parentNode.parentNode.querySelectorAll("input:not(.selectall)")) {
+                        if (elt.checked != this.checked) elt.click()
+                    }
+                })
+                moduleContainer.appendChild(tmp)
+            }
+            for (elt in modules[key]) {
+                target = modules[key][elt]
+                tt = createChoice(target['title'] + ' (' + target['size'] + ')', false, true)
+                tt.children[0].quantity = target['size']
+                tt.children[0].title = target['title']
+                tt.children[0].url = target['path']
+                tt.classList.add('serial')
+                tt.children[0].addEventListener('click', function (e) {
+                    target = this.parentNode.parentNode.querySelector('.modtitle')
+                    total = document.querySelector('.totalofqcm').children[2]
+                    if (this.checked) {
+                        target.count += this.quantity
+                        total.value += this.quantity
+                    }
+                    else {
+                        target.count -= this.quantity
+                        total.value -= this.quantity
+                    }
+                    target.innerText = target.baseText.replace("<?>", target.count)
+                    total.innerText = total.baseText.replace("<?>", total.value)
+                })
+                tt.classList.add('hidden')
+                moduleContainer.appendChild(tt)
+                nbContent = nbContent + target['size']
+            }
+            moduleTitle.count = 0
+            moduleTitle.baseText = key + ': <?>/' + nbContent + " QCM"
+            moduleTitle.innerText = key + ': 0/' + nbContent + " QCM"
+            moduleTitle.addEventListener('click', hideChoices)
+            container.appendChild(moduleContainer)
+        }
+    }
 
 
+    function createProgressiveQuestionsStartInteface() {
+        moduleContainer = createClassElement('div', "answerList")
+                
+        for (elt of index[mode]) {
+                tt = createChoice(elt['title']+ ' ('+elt['size']+')', 'menu', true)
+                tt.children[0].quantity = elt['size']
+                tt.children[0].title = elt['title']
+                tt.children[0].url = elt['path']
+                tt.classList.add('serial')
+                tt.addEventListener('click', function (e) { document.querySelector('.totalofqcm').children[2].value = this.children[0].quantity })
+
+                if (mode== 'lca') {
+                    seePDF = createClassElement('text','seepdf')
+                    seePDF.innerText = "Voir l'article"
+                    seePDF.link = elt['pdfUrl'] 
+                    seePDF.addEventListener('click', function (e) { window.open(this.link, '_blank'); })
+                    tt.appendChild(seePDF)
+                }
+                moduleContainer.appendChild(tt)
+            }
+        return moduleContainer
+    }
 
     function getModelFromSeed(seed, length) {
         const hash = sha256.array(seed.toLowerCase());
@@ -721,13 +764,15 @@
         const correspundingIndexes = []
         const resToLoad = []
 
-        for (elt of document.querySelectorAll('.serial>input[type="checkbox"]:checked')) {
-            resToLoad.push(elt.url)
-            for (let i = 0; i < elt.quantity; i++) {correspundingIndexes.push([i, resToLoad.length - 1])}
-        }
-
-        for (let i = 0; i < model.length; i++) {model[i] = correspundingIndexes[model[i]]}
-        for (let i = 0; i < resToLoad.length; i++) {resToLoad[i] = fetchData(resToLoad[i])}
+        if (mode == 'qcm') { elemList = document.querySelectorAll('.serial>input[type="checkbox"]:checked') }
+        else if (mode == 'lca'|| mode == 'dp') {elemList = document.querySelectorAll('.serial>input[type="radio"]:checked') }
+            for (elt of elemList) {
+                resToLoad.push(elt.url)
+                for (let i = 0; i < elt.quantity; i++) {correspundingIndexes.push([i, resToLoad.length - 1])}
+            }
+        
+            for (let i = 0; i < model.length; i++) {model[i] = correspundingIndexes[model[i]]}
+            for (let i = 0; i < resToLoad.length; i++) {resToLoad[i] = fetchData(resToLoad[i])}
 
         Promise.all(resToLoad)
             .then(loadedRes => {
