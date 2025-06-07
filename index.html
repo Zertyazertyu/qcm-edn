@@ -7,11 +7,8 @@
 
 </head>
 <style>
-    html {
-        weight: 100%;
-    }
 
-    .container {
+    .container, .settings {
         margin-left: auto;
         margin-right: auto;
         color: #333;
@@ -23,7 +20,7 @@
         display: block;
         counter-reset: question-number;
         max-width: 1000px;
-
+        margin-bottom: 10px;
     }
 
 
@@ -55,7 +52,8 @@
         min-height: 20px;
     }
 
-    .info {
+    .info,
+    .modemenu::before {
 
         font-size: 125%;
         font-weight: bolder;
@@ -181,10 +179,28 @@
     .seedentry {
         width: 80%;
     }
+
+    .modemenu::before{
+        content: "Choix du mode: ";
+    }
+    
+    .modemenu {
+        max-width: 70%;
+        margin-bottom: -5px;
+    }
+
+    .modechoice {
+        font-size: 125%;
+        font-weight: bold;
+        margin-right: 5px;
+        margin-bottom: 5px;
+    }
 </style>
 
 <body>
+    <div class="settings"></div>
     <div class="container">
+    
 
     </div>
 
@@ -220,6 +236,15 @@
             return JSON.parse(new TextDecoder().decode(buffer));
         }
     }
+
+    function changemode() {
+        if (mode != this.mode) {
+            mode = this.mode
+            document.querySelector('.container').innerHTML = ""
+            createStartInterface()
+        }
+    }
+ 
 
     function verify() {
         correction = !correction
@@ -516,13 +541,34 @@
             }
     }
 
+    function createSettingsMenu() {
+        settings = document.querySelector('.settings')
 
+        modemenu = createClassElement('div', "modemenu")
+
+        for(let mode in index) {
+            elem = createClassElement('button', 'modechoice')
+            elem.innerText = mode + " ("+ index[mode].length+")"
+            elem.mode = mode
+            elem.onclick = changemode
+            modemenu.appendChild(elem)
+        } 
+        
+            elem = createClassElement('button', 'modechoice')
+            elem.innerText = "test" + " (0)"
+            elem.mode = "test"
+            elem.onclick = changemode
+            modemenu.appendChild(elem)
+
+        settings.appendChild(modemenu)
+
+    }
 
 
     function createStartInterface() {
         container = document.querySelector('.container')
         title = createClassElement('div', 'info')
-        title.innerText = "Qcm EDN"
+        title.innerText = "Mode "+mode
         container.appendChild(title)
         modules = getModuleList()
         for (key of Object.keys(modules)) {
@@ -687,6 +733,7 @@
             .then(loadedRes => {
                 for (let i = 0; i < model.length; i++) {model[i] = loadedRes[model[i][1]][model[i][0]]}
                 document.querySelector('.container').innerHTML = ""
+                document.querySelector('.settings').remove()
                 createSet(model, progressive_mode)
             })
     }
@@ -707,7 +754,7 @@
 
     function getModuleList() {
         modules = {}
-        for (elt of index['qcm']) {
+        for (elt of index[mode]) {
             if (!(elt['module'] in modules)) modules[elt['module']] = [elt]
             else {modules[elt['module']].push(elt)}
         }
@@ -716,9 +763,11 @@
 
 
     let correction = false;
-
+    
     (async () => {
         index = await fetchData("https://raw.githubusercontent.com/Zertyazertyu/qcm-edn/main/index.gz")
+        mode = Object.keys(index)[0]
+        createSettingsMenu()
         createStartInterface()
     })()
 
