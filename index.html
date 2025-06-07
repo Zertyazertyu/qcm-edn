@@ -326,10 +326,12 @@
     }
 
     function betterPoints(nbfautes, qcm) {
+
         type = qcm['type']
         if (type == "qcm") {return ((nbfautes == 0) ? 1 : (nbfautes == 1) ? 0.5 : (nbfautes == 2) ? 0.2 : 0)}
         else if (type == "qru" || type == "qroc") {return (nbfautes == 0) ? 1 : 0}
         else if (type == "kfp") {return Math.max(1 - (nbfautes / qcm['nbGoodAnswers']), 0)}
+        else return 1
     }
 
     function levenshteinDistance(a, b) {
@@ -427,6 +429,9 @@
             if (nbfautes) {nbfautes = 4}
             feed = qcm.parentNode.children[3].children[0]
             feed.innerText = betterPoints(nbfautes, ref) + " point" + ((betterPoints(nbfautes, ref) != 1) ? 's.' : '.')
+        } else {
+            qcm.parentNode.children[3].classList.remove("hidden")
+            nbfautes = 0
         }
 
         qcm.parentNode.children[3].classList.remove("hidden")
@@ -457,13 +462,18 @@
         qcmFb = createClassElement('div', 'feedback', 'hidden')
         qcmFb.appendChild(createClassElement('div', 'fbtitle'))
         qcmfbb = document.createElement('div')
+
         if (qcm['type'] == 'qroc') {
             suffix = (qcm['responses'].length > 1) ? 's' : ''
             qcmfbb.innerHTML = '<p><b>Réponse' + suffix + ' attendue' + suffix + ': ' + qcm['responses'].join(', ') +'</b></p>'
-        } qcmfbb.innerHTML += qcm['feedback'] 
+        } 
+
+        qcmfbb.innerHTML += qcm['feedback'] 
         qcmFb.appendChild(qcmfbb)
+
         if (qcm['type'] == 'kfp') {qcmTitle.innerHTML += "<p><b>" + qcm['nbGoodAnswers'] + " réponses attendues.</b></p>"}
         newQcm.appendChild(qcmTitle)
+        
         if (qcm['type'] == 'qcm' || qcm['type'] == 'qru' || qcm['type'] == 'kfp') {
             qcmChoices = createClassElement('div', 'answerList', 'answer')
             if (qcm['type'] == 'qru') {radioName = getIncrementedNumber()}
@@ -494,13 +504,14 @@
             qrocResponse.appendChild(field)
             newQcm.appendChild(qrocResponse)
         } else {
-            textelement = createClassElement('text')
-            textelement.innerHTML = '(Qcm <b>'+qcm['type']+'</b> ignoré)'
-            qcmTitle.appendChild(textelement)
+            skipelement = createClassElement('div', 'answer')
+            skipelement.innerHTML = 'Question <b>'+qcm['type']+'</b> ignorée.'
+            newQcm.appendChild(skipelement)
         }
         newQcm.appendChild(qcmFb)
         container.appendChild(newQcm)
     }
+
     function createChoice(content, tag = false, no_prefix = false) {
         qst = document.createElement('div')
         mark = document.createElement('input')
