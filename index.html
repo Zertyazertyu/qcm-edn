@@ -766,6 +766,7 @@
     
     (async () => {
         index = await fetchData("https://raw.githubusercontent.com/Zertyazertyu/qcm-edn/main/index.gz")
+        console.log(index)
         mode = Object.keys(index)[0]
         createSettingsMenu()
         createStartInterface()
