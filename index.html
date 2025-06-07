@@ -439,9 +439,11 @@
             for (let i = 0; i < qcm.children.length; i++) {
                 value = ref['reward'][i]
 
-                score = createClassElement('div', 'tcsscore')
-                score.innerText = value
-                qcm.children[i].appendChild(score)
+                if (!qcm.children[i].lastElementChild.classList.contains('tcsscore')) {
+                    score = createClassElement('div', 'tcsscore')
+                    score.innerText = value
+                    qcm.children[i].appendChild(score)
+                }
 
                 if (qcm.children[i].children[0].checked) {
                     nbfautes = value
