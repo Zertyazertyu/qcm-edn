@@ -195,7 +195,7 @@
         margin-right: 5px;
         margin-bottom: 5px;
     }
-    .seepdf {
+    .seepdf, .tcsscore {
         white-space: nowrap;
         font-style: italic;          
         text-decoration: underline;  
@@ -203,6 +203,9 @@
         display: inline-block;       
         padding: 2px 6px;
         
+    }
+    .dpStatement{
+        border-bottom: 3px dashed #d0d0d0;
     }
 </style>
 
@@ -326,11 +329,12 @@
     }
 
     function betterPoints(nbfautes, qcm) {
-
+        console.log(qcm)
         type = qcm['type']
         if (type == "qcm") {return ((nbfautes == 0) ? 1 : (nbfautes == 1) ? 0.5 : (nbfautes == 2) ? 0.2 : 0)}
         else if (type == "qru" || type == "qroc") {return (nbfautes == 0) ? 1 : 0}
         else if (type == "kfp") {return Math.max(1 - (nbfautes / qcm['nbGoodAnswers']), 0)}
+        else if (type == "tcs") { return nbfautes }
         else return 1
     }
 
@@ -429,6 +433,26 @@
             if (nbfautes) {nbfautes = 4}
             feed = qcm.parentNode.children[3].children[0]
             feed.innerText = betterPoints(nbfautes, ref) + " point" + ((betterPoints(nbfautes, ref) != 1) ? 's.' : '.')
+        } 
+        
+        else if (ref['type'] == 'tcs') {
+            for (let i = 0; i < qcm.children.length; i++) {
+                value = ref['reward'][i]
+
+                score = createClassElement('div', 'tcsscore')
+                score.innerText = value
+                qcm.children[i].appendChild(score)
+
+                if (qcm.children[i].children[0].checked) {
+                    nbfautes = value
+                    if (value > 0 && value != 1) { qcm.children[i].classList.add('missing') }
+                    else if (value == 0) { qcm.children[i].classList.add('wrong') }
+                } if (value == 1) { qcm.children[i].classList.add('correct') }
+            }
+            feed = qcm.parentNode.children[3].children[0]
+            feed.innerText = betterPoints(nbfautes, ref) + " point" + ((betterPoints(nbfautes, ref) != 1) ? 's.' : '.')
+
+
         } else {
             qcm.parentNode.children[3].classList.remove("hidden")
             nbfautes = 0
@@ -474,9 +498,9 @@
         if (qcm['type'] == 'kfp') {qcmTitle.innerHTML += "<p><b>" + qcm['nbGoodAnswers'] + " réponses attendues.</b></p>"}
         newQcm.appendChild(qcmTitle)
         
-        if (qcm['type'] == 'qcm' || qcm['type'] == 'qru' || qcm['type'] == 'kfp') {
+        if (qcm['type'] == 'qcm' || qcm['type'] == 'qru' || qcm['type'] == 'kfp' || qcm['type'] == 'tcs') {
             qcmChoices = createClassElement('div', 'answerList', 'answer')
-            if (qcm['type'] == 'qru') {radioName = getIncrementedNumber()}
+            if (qcm['type'] == 'qru' || qcm['type'] == 'tcs') {radioName = getIncrementedNumber()}
             else {radioName = undefined}
             for (let i = 0; i < qcm['choices'].length; i++) {
                 choice = createChoice(qcm['choices'][i], radioName)
@@ -503,7 +527,9 @@
             field.type = 'text'
             qrocResponse.appendChild(field)
             newQcm.appendChild(qrocResponse)
-        } else {
+        }
+        else {
+            console.log(qcm)
             skipelement = createClassElement('div', 'answer')
             skipelement.innerHTML = 'Question <b>'+qcm['type']+'</b> ignorée.'
             newQcm.appendChild(skipelement)
