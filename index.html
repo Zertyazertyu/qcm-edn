@@ -794,6 +794,7 @@ function wrapImageWithCanvas(img) {
         options = createClassElement('div', "answerList", "options")
         progressiveMode = createChoice('Mode progressif', false, true)
         progressiveMode.classList.add('progressiveMode')
+        progressiveMode.children[0].checked = true
         options.appendChild(progressiveMode)
         sortOption = createChoice('Utiliser les séries complètes', false, true)
         sortOption.classList.add("useCompleteSeries")
@@ -839,7 +840,6 @@ function wrapImageWithCanvas(img) {
 
         if (mode == 'dp' || mode == 'lca') {
             progressiveMode.children[0].disabled = true
-            progressiveMode.children[0].checked = true
 
             document.querySelector('.useCompleteSeries').children[0].checked = true
             document.querySelector('.useCompleteSeries').children[0].disabled = true
