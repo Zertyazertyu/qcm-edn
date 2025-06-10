@@ -329,10 +329,9 @@
     }
 
     function betterPoints(nbfautes, qcm) {
-        console.log(qcm)
         type = qcm['type']
         if (type == "qcm") {return ((nbfautes == 0) ? 1 : (nbfautes == 1) ? 0.5 : (nbfautes == 2) ? 0.2 : 0)}
-        else if (type == "qru" || type == "qroc") {return (nbfautes == 0) ? 1 : 0}
+        else if (type == "qru" || type == "qroc" || "zap") {return (nbfautes == 0) ? 1 : 0}
         else if (type == "kfp") {return Math.max(1 - (nbfautes / qcm['nbGoodAnswers']), 0)}
         else if (type == "tcs") { return nbfautes }
         else return 1
@@ -426,8 +425,6 @@
                     qcm.children[i].classList.add('wrong')
                     nbfautes++
                 }
-
-
             }
 
             if (nbfautes) {nbfautes = 4}
@@ -455,6 +452,16 @@
             feed.innerText = betterPoints(nbfautes, ref) + " point" + ((betterPoints(nbfautes, ref) != 1) ? 's.' : '.')
 
 
+        } else if (ref['type'] == 'zap') {
+            canvas = qcm.querySelector('canvas')
+            canvas.drawZones(ref['responses'])
+
+            if (!canvas.isValid()) nbfautes = 1
+
+            feed = qcm.parentNode.children[3].children[0]
+            feed.innerText = canvas.isAnswered() ? betterPoints(nbfautes, ref) + " point" + ((betterPoints(nbfautes, ref) != 1) ? 's.' : '.') : "Question non répondue."
+        
+        
         } else {
             qcm.parentNode.children[3].classList.remove("hidden")
             nbfautes = 0
@@ -529,9 +536,14 @@
             field.type = 'text'
             qrocResponse.appendChild(field)
             newQcm.appendChild(qrocResponse)
-        }
-        else {
-            console.log(qcm)
+
+        } else if (qcm['type'] == 'zap') {
+            const img = newQcm.querySelector('img');
+            cnttmp = wrapImageWithCanvas(img);
+            newQcm.appendChild(cnttmp);
+
+        } else {
+
             skipelement = createClassElement('div', 'answer')
             skipelement.innerHTML = 'Question <b>'+qcm['type']+'</b> ignorée.'
             newQcm.appendChild(skipelement)
@@ -593,6 +605,163 @@
             document.querySelector(".container").appendChild(verifyButton)
             }
     }
+
+function wrapImageWithCanvas(img) {
+    const container = createClassElement('div', 'answer');
+    container.style.display = getComputedStyle(img).display === 'block' ? 'block' : 'inline-block';
+    container.style.position = 'relative';
+    container.style.width = 'fit-content';
+    container.style.height = 'fit-content';
+
+    img.style.display = 'block';
+    img.style.width = '100%';
+    img.style.height = '100%';
+
+    const canvas = document.createElement('canvas');
+    canvas.style.position = 'absolute';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.pointerEvents = 'auto';
+
+    container.appendChild(img);
+    container.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d');
+    let crossPos = null;
+    const crossSize = 10;
+
+    const naturalWidth = img.naturalWidth;
+    const naturalHeight = img.naturalHeight;
+
+    function drawCross(x, y) {
+        ctx.strokeStyle = 'red';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x - crossSize, y - crossSize);
+        ctx.lineTo(x + crossSize, y + crossSize);
+        ctx.stroke();
+
+        ctx.strokeStyle = 'blue';
+        ctx.beginPath();
+        ctx.moveTo(x + crossSize, y - crossSize);
+        ctx.lineTo(x - crossSize, y + crossSize);
+        ctx.stroke();
+    }
+
+    function pointInPolygon(p, poly) {
+        let inside = false;
+        for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+            const xi = poly[i].x, yi = poly[i].y;
+            const xj = poly[j].x, yj = poly[j].y;
+            const intersect = ((yi > p.y) !== (yj > p.y)) &&
+                (p.x < (xj - xi) * (p.y - yi) / ((yj - yi) || 1e-10) + xi);
+            if (intersect) inside = !inside;
+        }
+        return inside;
+    }
+
+    function resize() {
+        canvas.width = img.offsetWidth;
+        canvas.height = img.offsetHeight;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (canvas._zones) {
+            canvas.drawZones(canvas._zones);
+        } else if (crossPos) {
+            drawCross(crossPos.x, crossPos.y);
+        }
+    }
+
+    const resizeObserver = new ResizeObserver(resize);
+    resizeObserver.observe(img);
+
+    canvas.addEventListener('click', (e) => {
+        if (canvas._locked) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        crossPos = { x, y };
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (canvas._zones) {
+            canvas.drawZones(canvas._zones);
+        } else {
+            drawCross(x, y);
+        }
+    });
+
+    canvas.drawZones = function(zones) {
+        canvas._zones = zones;
+        canvas._locked = true;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const scaleX = canvas.width / naturalWidth;
+        const scaleY = canvas.height / naturalHeight;
+
+        zones.forEach(zoneStr => {
+            const points = zoneStr.split(',').map(pt => {
+                const [x, y] = pt.split(':').map(Number);
+                return { x: x * scaleX, y: y * scaleY };
+            });
+
+            if (points.length < 3) return;
+
+            const contains = crossPos && pointInPolygon(crossPos, points);
+            ctx.fillStyle = (contains ? 'green' : 'orange');
+            ctx.globalAlpha = 0.3; // 30% opaque, 70% transparent
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, points[0].y);
+            for (let i = 1; i < points.length; i++) {
+                ctx.lineTo(points[i].x, points[i].y);
+            }
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.globalAlpha = 1;
+            ctx.strokeStyle = contains ? 'green' : 'orange';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        });
+
+        if (crossPos) {
+            drawCross(crossPos.x, crossPos.y);
+        }
+    };
+
+    canvas.isValid = function() {
+        if (!canvas._zones || !crossPos) return false;
+
+        const scaleX = canvas.width / naturalWidth;
+        const scaleY = canvas.height / naturalHeight;
+
+        return canvas._zones.some(zoneStr => {
+            const points = zoneStr.split(',').map(pt => {
+                const [x, y] = pt.split(':').map(Number);
+                return { x: x * scaleX, y: y * scaleY };
+            });
+            return pointInPolygon(crossPos, points);
+        });
+    };
+
+    canvas.isAnswered = function() {
+    return crossPos !== null;
+    };
+
+    resize();
+
+    return container;
+}
+
+
+
+
+
+
 
     function createSettingsMenu() {
         settings = document.querySelector('.settings')
