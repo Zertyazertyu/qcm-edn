@@ -7,6 +7,23 @@
 
 </head>
 <style>
+        html.dark-mode {
+    background: black !important;
+    }
+
+    body.dark-mode {
+        filter: invert(1) hue-rotate(180deg);
+    }
+
+    body.dark-mode img,
+    body.dark-mode video,
+    body.dark-mode canvas {
+        filter: invert(1) hue-rotate(180deg);
+    }
+
+</style>
+
+<style>
 
     .container, .settings {
         margin-left: auto;
@@ -179,13 +196,14 @@
     .seedentry {
         width: 80%;
     }
+    
 
     .modemenu::before{
         content: "Choix du mode: ";
     }
     
     .modemenu {
-        max-width: 70%;
+        max-width: 60%;
         margin-bottom: -5px;
     }
 
@@ -207,6 +225,16 @@
     .dpStatement{
         border-bottom: 3px dashed #d0d0d0;
     }
+
+    .toggleColorMode{
+        margin-top: -35px;
+        margin-left: calc(100% - 105px);
+        border-radius: 4px;
+        font-size: 120%;
+        display: flex;
+        max-width: 30%;
+    }
+
 </style>
 
 <body>
@@ -453,6 +481,7 @@
 
 
         } else if (ref['type'] == 'zap') {
+
             canvas = qcm.querySelector('canvas')
             canvas.drawZones(ref['responses'])
 
@@ -632,8 +661,16 @@ function wrapImageWithCanvas(img) {
     let crossPos = null;
     const crossSize = 10;
 
-    const naturalWidth = img.naturalWidth;
-    const naturalHeight = img.naturalHeight;
+    let naturalWidth = img.naturalWidth;
+    let naturalHeight = img.naturalHeight;
+
+    if (!naturalWidth || !naturalHeight) {
+        img.onload = () => {
+            naturalWidth = img.naturalWidth;
+            naturalHeight = img.naturalHeight;
+            resize();
+        };
+    }
 
     function drawCross(x, y) {
         ctx.strokeStyle = 'red';
@@ -671,7 +708,7 @@ function wrapImageWithCanvas(img) {
         if (canvas._zones) {
             canvas.drawZones(canvas._zones);
         } else if (crossPos) {
-            drawCross(crossPos.x, crossPos.y);
+            drawCross(crossPos.x * canvas.width, crossPos.y * canvas.height);
         }
     }
 
@@ -685,7 +722,7 @@ function wrapImageWithCanvas(img) {
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
 
-        crossPos = { x, y };
+        crossPos = { x: x / canvas.width, y: y / canvas.height };
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         if (canvas._zones) {
@@ -711,8 +748,10 @@ function wrapImageWithCanvas(img) {
 
             if (points.length < 3) return;
 
-            const contains = crossPos && pointInPolygon(crossPos, points);
-            ctx.fillStyle = (contains ? 'green' : 'orange');
+            const crossPosPx = crossPos ? { x: crossPos.x * canvas.width, y: crossPos.y * canvas.height } : null;
+            const contains = crossPosPx && pointInPolygon(crossPosPx, points);
+
+            ctx.fillStyle = contains ? 'green' : 'orange';
             ctx.globalAlpha = 0.3;
             ctx.beginPath();
             ctx.moveTo(points[0].x, points[0].y);
@@ -729,7 +768,7 @@ function wrapImageWithCanvas(img) {
         });
 
         if (crossPos) {
-            drawCross(crossPos.x, crossPos.y);
+            drawCross(crossPos.x * canvas.width, crossPos.y * canvas.height);
         }
     };
 
@@ -738,13 +777,14 @@ function wrapImageWithCanvas(img) {
 
         const scaleX = canvas.width / naturalWidth;
         const scaleY = canvas.height / naturalHeight;
+        const crossPosPx = { x: crossPos.x * canvas.width, y: crossPos.y * canvas.height };
 
         return canvas._zones.some(zoneStr => {
             const points = zoneStr.split(',').map(pt => {
                 const [x, y] = pt.split(':').map(Number);
                 return { x: x * scaleX, y: y * scaleY };
             });
-            return pointInPolygon(crossPos, points);
+            return pointInPolygon(crossPosPx, points);
         });
     };
 
@@ -777,6 +817,25 @@ function wrapImageWithCanvas(img) {
         } 
 
         settings.appendChild(modemenu)
+
+        button = createClassElement('button', 'toggleColorMode')
+        if (localStorage.getItem('darkmode') === '1') {
+            document.documentElement.classList.add('dark-mode')
+            document.body.classList.add('dark-mode')
+            button.innerText = "Mode clair"
+        } else button.innerText = "Mode sombre"
+
+        button.onclick = () => {
+            document.documentElement.classList.toggle('dark-mode')
+            document.body.classList.toggle('dark-mode')
+
+            const dark = document.body.classList.contains('dark-mode')
+            localStorage.setItem('darkmode', dark ? '1' : '0')
+
+            button.innerText = dark ? "Mode clair" : "Mode sombre"
+        }
+        
+        settings.appendChild(button)
 
     }
 
