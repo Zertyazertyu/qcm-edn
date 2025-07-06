@@ -358,6 +358,7 @@
 
     function betterPoints(nbfautes, qcm) {
         type = qcm['type']
+        if (suddendeath && !type == "tcs") { return (nbfautes == 0) ? 1 :0; }
         if (type == "qcm") { return ((nbfautes == 0) ? 1 : (nbfautes == 1) ? 0.5 : (nbfautes == 2) ? 0.2 : 0)}
         else if (type == "qru" || type == "qroc" || type == "zap") {return (nbfautes == 0) ? 1 : 0}
         else if (type == "kfp") { return Math.max(1 - (nbfautes / qcm['nbGoodAnswers']), 0)}
@@ -855,6 +856,10 @@ function wrapImageWithCanvas(img) {
         progressiveMode.classList.add('progressiveMode')
         progressiveMode.children[0].checked = true
         options.appendChild(progressiveMode)
+        suddendeathMode = createChoice('Mort subite', false, true)
+        suddendeathMode.classList.add('suddendeath')
+        suddendeathMode.children[0].checked = true
+        options.appendChild(suddendeathMode)
         sortOption = createChoice('Utiliser les séries complètes', false, true)
         sortOption.classList.add("useCompleteSeries")
         sortOption.addEventListener('click', function (e) {
@@ -924,6 +929,7 @@ function wrapImageWithCanvas(img) {
                 model = getModelFromSeed(seed, totalnumberOfQCM).slice(0, chosenNumberOfQCM)
             }
             createSetFromModel(model, document.querySelector('.progressiveMode').children[0].checked)
+            suddendeath = document.querySelector('.suddendeath').children[0].checked
         })
         container.appendChild(startButton)
     }
@@ -1075,6 +1081,7 @@ function wrapImageWithCanvas(img) {
 
 
     let correction = false;
+    let suddendeath = false;
     
     (async () => {
         index = await fetchData("https://raw.githubusercontent.com/Zertyazertyu/qcm-edn/main/index.gz")
