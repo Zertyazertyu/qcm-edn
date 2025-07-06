@@ -358,7 +358,7 @@
 
     function betterPoints(nbfautes, qcm) {
         type = qcm['type']
-        if (suddendeath && !type == "tcs") { return (nbfautes == 0) ? 1 :0; }
+        if (suddendeath && !(type == "tcs")) { return (nbfautes == 0) ? 1 :0; }
         if (type == "qcm") { return ((nbfautes == 0) ? 1 : (nbfautes == 1) ? 0.5 : (nbfautes == 2) ? 0.2 : 0)}
         else if (type == "qru" || type == "qroc" || type == "zap") {return (nbfautes == 0) ? 1 : 0}
         else if (type == "kfp") { return Math.max(1 - (nbfautes / qcm['nbGoodAnswers']), 0)}
